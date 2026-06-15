@@ -1,0 +1,36 @@
+# Project-level orchestration
+# Brings together all services: keycloak stack + artifact-server routing
+
+version: '3.8'
+
+services:
+  # Include keycloak stack (keycloak + caddy + postgres)
+  # This is the atomic service group that always runs together
+  keycloak:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: keycloak
+
+  postgres:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: postgres
+
+  caddy:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: caddy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      # Artifact server: host path where release zips/manifests are placed
+      - /data/ics:/data/ics:ro
+
+volumes:
+  data-ics-auth-server:
+  caddy_data:
+  caddy_config:
+
+networks:
+  auth-server-network:

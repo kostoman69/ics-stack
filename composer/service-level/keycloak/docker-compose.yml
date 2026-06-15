@@ -1,0 +1,80 @@
+# Οι μεταβλητές ορίζονται στο αρχείο .env
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ics-auth-server-db
+    volumes:
+      - data-ics-auth-server:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - auth-server-network
+
+  keycloak:
+    # Εδώ έχω μαζέψει όλα που κατά καιρούς έχω διαβάσει σε διάφορα άρθρα με βασικό οδηγό το official documentation του keycloak
+    # Running Keycloak in a container [https://www.keycloak.org/server/containers]
+    image: ics-auth-server:24.08.2
+    build:
+      context: .
+      dockerfile: ../../../images/keycloak/Dockerfile
+    container_name: ics-auth-server
+    depends_on:
+      - postgres
+      - caddy
+    environment:
+      # Admin Credentials (https://www.keycloak.org/docs/latest/server_admin/index.html#creating-the-account-remotely)
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      # Database runtime Configuration Options
+      KC_DB_URL: 'jdbc:postgresql://postgres/keycloak'
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    #PROXY_ADDRESS_FORWARDING: "true"
+    command:
+      - start
+      - --optimized
+      - --hostname=https://authics.info
+      - --http-enabled=true
+      - --proxy=edge
+      - --proxy-headers=forwarded
+    #  [
+    #    'start',
+    #    '--optimized',
+    #    '--proxy edge',
+    #    '--proxy-headers forwarded',
+    #    '--hostname https://authics.info'
+    #  ]
+    restart: always
+    # Δε χρειάζεται να κάνω export ports του keycloak στον host. Ο caddy αναλαμβάνει το forwarding στο keycloak μέσω του docker network
+    #ports:
+    networks:
+      - auth-server-network
+
+  caddy:
+    image: caddy:latest
+    container_name: reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+      - "2019:2019" # Caddy Admin API
+    #  - "2019:2019" # Caddy Admin API (deprecated)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      #- ./site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - auth-server-network
+
+volumes:
+  data-ics-auth-server:
+  caddy_data:
+  caddy_config:
+
+
+networks:
+  auth-server-network:

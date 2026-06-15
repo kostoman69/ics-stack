@@ -1,0 +1,51 @@
+# Project-level orchestration
+# Brings together the Keycloak stack, artifact server routing, and OpenBao
+
+services:
+  # Include keycloak stack (keycloak + postgres)
+  keycloak:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: keycloak
+    networks:
+      - auth-server-network
+
+  postgres:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: postgres
+    networks:
+      - auth-server-network
+
+  # OpenBao needs its orchestration-specific config so the public URL matches the proxy host
+  openbao:
+    extends:
+      file: ../../service-level/openbao/docker-compose.yml
+      service: openbao
+    volumes:
+      - openbao-data:/openbao/data
+      - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
+    networks:
+      - auth-server-network
+
+  caddy:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: caddy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      # Artifact server: host path where release zips/manifests are placed
+      - /data/ics:/data/ics:ro
+    networks:
+      - auth-server-network
+
+volumes:
+  data-ics-auth-server:
+  openbao-data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  auth-server-network:

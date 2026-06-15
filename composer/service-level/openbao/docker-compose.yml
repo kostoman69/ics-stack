@@ -1,0 +1,17 @@
+services:
+  openbao:
+    image: openbao/openbao:2.5.4
+    container_name: openbao
+    restart: unless-stopped
+
+    command: server -config=/etc/openbao/bao.hcl
+
+    cap_add:
+      - IPC_LOCK
+
+    volumes:
+      - openbao-data:/openbao/data
+      - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
+
+volumes:
+  openbao-data:

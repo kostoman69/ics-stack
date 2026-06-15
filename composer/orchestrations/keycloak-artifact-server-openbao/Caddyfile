@@ -1,0 +1,58 @@
+icsauth.net {
+    # TLS 1.2+ with automatic ACME certificate management
+    tls {
+        protocols tls1.2 tls1.3
+    }
+
+    # Add correlation ID for tracing
+    @no_corr header X-Correlation-ID ""
+    header @no_corr X-Correlation-ID {uuid}
+    header X-Served-By "Caddy (Orchestration)"
+
+    # OpenBao API
+    handle /v1/* {
+        reverse_proxy openbao:8200
+    }
+
+    # OpenBao UI
+    handle /ui/* {
+        reverse_proxy openbao:8200
+    }
+
+    # Optional: OpenBao UI entry
+    handle /bao {
+        redir /ui/ 302
+    }
+
+    # Artifact server (static files under /data/ics/*)
+    handle_path /data/ics/* {
+        root * /data/ics
+        file_server browse
+    }
+
+    # Optional friendly response for root path checks.
+    respond / "ICS artifact server" 200
+
+    # Security: only allow downloads, no directory traversal
+    @blocked path /../*
+    respond @blocked 403
+
+    # Keycloak gets everything else
+    handle {
+        reverse_proxy ics-auth-server:8080 {
+            # Preserve original request headers for Keycloak
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Port 443
+        }
+    }
+
+    # Structured JSON logging with rotation (mirrors service-level)
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10MB
+            roll_keep 7
+            roll_keep_for 720h
+        }
+        format json
+    }
+}

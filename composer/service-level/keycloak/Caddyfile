@@ -1,0 +1,28 @@
+icsauth.net {
+	# TLS 1.2+ with automatic ACME certificate management
+	tls {
+		protocols tls1.2 tls1.3
+	}
+
+	# Add correlation ID for tracing
+	@no_corr header X-Correlation-ID ""
+	header @no_corr X-Correlation-ID {uuid}
+	header X-Served-By "Caddy"
+
+	# Proxy all traffic to local Keycloak instance
+	reverse_proxy http://icsauth:8080 {
+		# Preserve original request headers
+		header_up X-Forwarded-Proto https
+		header_up X-Forwarded-Port 443
+	}
+
+	# Structured JSON logging with rotation
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10MB
+			roll_keep 7
+			roll_keep_for 720h
+		}
+		format json
+	}
+}
