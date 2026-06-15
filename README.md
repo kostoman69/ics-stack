@@ -1,18 +1,15 @@
-# Containers Folder Structure
+# ics-stack Folder Structure
 
-This folder contains all containerization assets for this project. Use this as the universal, portable structure for all future projects.
+This repository contains all containerization assets for this project. Use this as the universal, portable structure for all future projects.
 
 ## Structure Overview
 
 ```
-Containers/
+ics-stack/
 ├── composer/
 │   ├── orchestrations/          # Project-level orchestrations (multiple environments)
-│   │   ├── dev/
-│   │   │   ├── docker-compose.yml
-│   │   │   └── Caddyfile
-│   │   ├── qa/
-│   │   └── prod/
+│   │   ├── keycloak-artifact-server/
+│   │   └── keycloak-artifact-server-openbao/
 │   └── service-level/           # Service-level compositions (atomic service groups)
 │       ├── keycloak/            # Keycloak stack (keycloak + caddy + postgres)
 │       ├── caddy/               # Caddy reverse proxy
@@ -27,24 +24,23 @@ Containers/
 
 ## Usage
 
-### Running the Dev Environment
+### Running an Orchestration
 
 ```bash
-cd Containers/composer/orchestrations/dev/
-docker-compose up -d
+cd composer/orchestrations/keycloak-artifact-server-openbao/
+docker compose up -d
 ```
 
-### Cloning Only This Folder
+### Cloning From GitHub
 
-To clone **only the Containers folder** from the repository (useful for deploying to servers):
+To clone the repository from GitHub:
 
 ```bash
-git clone --filter=blob:none --sparse https://ksenofon.ics.forth.gr/DefaultCollection/CeHA/_git/ICS
-cd ICS
-git sparse-checkout set Containers
+git clone https://github.com/kostoman69/ics-stack.git
+cd ics-stack
 ```
 
-This will download only the `Containers/` folder, significantly reducing bandwidth and disk usage.
+If you only need part of the repository, you can enable sparse checkout after cloning.
 
 ## Conventions
 
