@@ -12,6 +12,7 @@ icsauth.net {
     # Exact redirects first
     redir /ui /ui/ 302
     redir /bao /ui/ 302
+    redir /ics/pki /ics/pki/ 302
 
     # Optional friendly response for root path checks.
     handle / {
