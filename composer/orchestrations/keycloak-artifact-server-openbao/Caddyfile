@@ -9,19 +9,22 @@ icsauth.net {
     header @no_corr X-Correlation-ID {uuid}
     header X-Served-By "Caddy (Orchestration)"
 
-    # OpenBao API
-    handle /v1/* {
-        reverse_proxy openbao:8200
-    }
+    # Exact redirects first
+    redir /ui /ui/ 302
+    redir /bao /ui/ 302
 
+    # Optional friendly response for root path checks.
+    handle / {
+        respond "ICS artifact server" 200
+    }
+    
     # OpenBao UI
     handle /ui/* {
         reverse_proxy openbao:8200
     }
-
-    # Optional: OpenBao UI entry
-    handle /bao {
-        redir /ui/ 302
+    # OpenBao API
+    handle /v1/* {
+        reverse_proxy openbao:8200
     }
 
     # Artifact server (static files under /data/ics/*)
@@ -30,8 +33,10 @@ icsauth.net {
         file_server browse
     }
 
-    # Optional friendly response for root path checks.
-    respond / "ICS artifact server" 200
+    # ICS PKI Provisioning API
+    handle_path /ics/pki/* {
+        reverse_proxy ics-pki-provisioning:8787
+    }
 
     # Security: only allow downloads, no directory traversal
     @blocked path /../*

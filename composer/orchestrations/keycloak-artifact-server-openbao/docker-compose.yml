@@ -27,6 +27,16 @@ services:
       - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
     networks:
       - auth-server-network
+    
+  ics-pki-provisioning:
+    extends:
+      file: ../../service-level/ics-pki-provisioning/docker-compose.yml
+      service: ics-pki-provisioning
+    volumes:
+      - /data/ics/cert-provisioning:/data/ics/cert-provisioning
+      - /data/ics/cert-bundles:/data/ics/cert-bundles
+    networks:
+      - auth-server-network
 
   caddy:
     extends:
@@ -38,6 +48,8 @@ services:
       - caddy_config:/config
       # Artifact server: host path where release zips/manifests are placed
       - /data/ics:/data/ics:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - auth-server-network
 

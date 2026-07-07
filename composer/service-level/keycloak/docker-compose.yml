@@ -35,16 +35,15 @@ services:
     command:
       - start
       - --optimized
-      - --hostname=https://authics.info
+      - --hostname=https://icsauth.net
       - --http-enabled=true
-      - --proxy=edge
       - --proxy-headers=forwarded
     #  [
     #    'start',
     #    '--optimized',
     #    '--proxy edge',
     #    '--proxy-headers forwarded',
-    #    '--hostname https://authics.info'
+    #    '--hostname https://icsauth.net'
     #  ]
     restart: always
     # Δε χρειάζεται να κάνω export ports του keycloak στον host. Ο caddy αναλαμβάνει το forwarding στο keycloak μέσω του docker network

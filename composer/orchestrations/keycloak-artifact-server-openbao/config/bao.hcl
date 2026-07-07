@@ -13,5 +13,3 @@ listener "tcp" {
 
 api_addr     = "https://icsauth.net"
 cluster_addr = "http://openbao:8201"
-
-disable_mlock = true

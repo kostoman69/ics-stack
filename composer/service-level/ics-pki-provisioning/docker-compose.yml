@@ -1,0 +1,18 @@
+services:
+  ics-pki-provisioning:
+    image: ${ICS_PKI_IMAGE:-forth-ics-pki-provisioning:latest}
+    platform: ${ICS_PKI_PLATFORM:-linux/amd64}
+    container_name: ics-pki-provisioning
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      ICS_PKI_TARGET_CONFIG: /data/ics/cert-provisioning/cert-targets.json
+      ICS_PKI_BUNDLE_ROOT: /data/ics/cert-bundles
+      ICS_OPENBAO_BASE_URL: ${ICS_OPENBAO_BASE_URL:-http://127.0.0.1:8200}
+      ICS_OPENBAO_TOKEN: ${ICS_OPENBAO_TOKEN:?Set ICS_OPENBAO_TOKEN in environment or .env}
+      ICS_PKI_PUBLIC_BASE_URL: ${ICS_PKI_PUBLIC_BASE_URL:-https://icsauth.net/ics/pki}
+      ICS_OPENBAO_TIMEOUT_SECONDS: ${ICS_OPENBAO_TIMEOUT_SECONDS:-30}
+    volumes:
+      - /data/ics/cert-provisioning:/data/ics/cert-provisioning
+      - /data/ics/cert-bundles:/data/ics/cert-bundles
