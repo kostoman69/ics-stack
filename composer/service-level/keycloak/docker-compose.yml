@@ -2,15 +2,16 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: ics-auth-server-db
+    container_name: icsauth-srv-database
+    restart: unless-stopped 
     volumes:
-      - data-ics-auth-server:/var/lib/postgresql/data
+      - icsauth-srv-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
-      - auth-server-network
+      - ics-network
 
   keycloak:
     # Εδώ έχω μαζέψει όλα που κατά καιρούς έχω διαβάσει σε διάφορα άρθρα με βασικό οδηγό το official documentation του keycloak
@@ -19,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: ../../../images/keycloak/Dockerfile
-    container_name: ics-auth-server
+    container_name: icsauth-srv
     depends_on:
       - postgres
       - caddy
@@ -37,7 +38,7 @@ services:
       - --optimized
       - --hostname=https://icsauth.net
       - --http-enabled=true
-      - --proxy-headers=forwarded
+      - --proxy-headers=xforwarded
     #  [
     #    'start',
     #    '--optimized',
@@ -49,31 +50,39 @@ services:
     # Δε χρειάζεται να κάνω export ports του keycloak στον host. Ο caddy αναλαμβάνει το forwarding στο keycloak μέσω του docker network
     #ports:
     networks:
-      - auth-server-network
+      - ics-network
 
   caddy:
-    image: caddy:latest
-    container_name: reverse-proxy
+    image: caddy-cloudflare:2
+    build:
+      context: .
+      dockerfile: ../../../images/caddy/Dockerfile
+    container_name: ics-proxy
     restart: unless-stopped
+    environment:
+      CF_API_TOKEN: ${CF_API_TOKEN}
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
-      - "2019:2019" # Caddy Admin API
     #  - "2019:2019" # Caddy Admin API (deprecated)
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       #- ./site:/srv
-      - caddy_data:/data
-      - caddy_config:/config
+      - icsproxy-data:/data
+      - icsproxy-config:/config
     networks:
-      - auth-server-network
+      - ics-network
 
 volumes:
-  data-ics-auth-server:
-  caddy_data:
-  caddy_config:
-
+  icsauth-srv-data:
+    name: icsauth-srv-data
+  icsproxy-data:
+    name: icsproxy-data
+  icsproxy-config:
+    name: icsproxy-config 
 
 networks:
-  auth-server-network:
+  ics-network:
+    name: ics-network
+    

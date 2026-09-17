@@ -1,64 +1,139 @@
+icssuite.gr {
+	# TLS 1.2+ with ACME via Cloudflare DNS-01 (HTTP-01 is unreliable behind CF proxy)
+	tls {
+		protocols tls1.2 tls1.3
+		issuer acme {
+			preferred_chains {
+				root_common_name "ISRG Root X1"
+			}
+			dns cloudflare {env.CF_API_TOKEN}
+		}
+	}
+
+	respond "icssuite.gr is up and running ..." 200
+}
+
 icsauth.net {
-    # TLS 1.2+ with automatic ACME certificate management
-    tls {
-        protocols tls1.2 tls1.3
-    }
+	# TLS 1.2+ with automatic ACME certificate management
+	tls {
+		protocols tls1.2 tls1.3
+		issuer acme {
+			preferred_chains {
+				root_common_name "ISRG Root X1"
+			}
+		}
+	}
 
-    # Add correlation ID for tracing
-    @no_corr header X-Correlation-ID ""
-    header @no_corr X-Correlation-ID {uuid}
-    header X-Served-By "Caddy (Orchestration)"
+	# Add correlation ID for tracing
+	@no_corr header X-Correlation-ID ""
+	header @no_corr X-Correlation-ID {uuid}
+	header X-Served-By "Caddy (Orchestration)"
 
-    # Exact redirects first
-    redir /ui /ui/ 302
-    redir /bao /ui/ 302
-    redir /ics/pki /ics/pki/ 302
+	# Exact redirects first
+	redir /ui /ui/ 302
+	redir /bao /ui/ 302
+	redir /ics/pki /ics/pki/ 302
 
-    # Optional friendly response for root path checks.
-    handle / {
-        respond "ICS artifact server" 200
-    }
-    
-    # OpenBao UI
-    handle /ui/* {
-        reverse_proxy openbao:8200
-    }
-    # OpenBao API
-    handle /v1/* {
-        reverse_proxy openbao:8200
-    }
+	# Optional friendly response for root path checks.
+	handle / {
+		respond "ICS artifact server" 200
+	}
 
-    # Artifact server (static files under /data/ics/*)
-    handle_path /data/ics/* {
-        root * /data/ics
-        file_server browse
-    }
+	handle /ics/bootstrap {
+	header Content-Type "text/plain; charset=utf-8"
 
-    # ICS PKI Provisioning API
-    handle_path /ics/pki/* {
-        reverse_proxy ics-pki-provisioning:8787
-    }
+	respond <<EOF
+		ICS INSTALLATION AND UPGRADE RUNBOOK - QUICK REFERENCE
 
-    # Security: only allow downloads, no directory traversal
-    @blocked path /../*
-    respond @blocked 403
+		First installation of ICS Tools on a clean Windows host
+		-------------------------------------------------------
+		Run these commands from an elevated Command Prompt:
 
-    # Keycloak gets everything else
-    handle {
-        reverse_proxy ics-auth-server:8080 {
-            # Preserve original request headers for Keycloak
-            header_up X-Forwarded-Proto https
-            header_up X-Forwarded-Port 443
-        }
-    }
+		  1. cd "to a folder of your preference, usally a temp folder "
+		  2. curl.exe -fL https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip -o icstools-bootstrap-win-x64.zip
+		     [Alteratively, for Windows Server Versions < 2019 where curl.exe and tar.exe are not installed]
+		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip" -OutFile "icstools-bootstrap-win-x64.zip"
+		  3. curl.exe -fL https://icsauth.net/data/ics/11-tooling/bootstrap.json -o bootstrap.json
+		     [Alteratively]
+		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/bootstrap.json" -OutFile bootstrap.json
+		  4. [Optionally] certutil.exe -hashfile icstools-bootstrap-win-x64.zip SHA256
+		  5. tar.exe -xf icstools-bootstrap-win-x64.zip
+		     [Alteratively, unzip the file icstools-bootstrap-win-x64.zip]
 
-    # Structured JSON logging with rotation (mirrors service-level)
-    log {
-        output file /var/log/caddy/access.log {
-            roll_size 10MB
-            roll_keep 7
-            roll_keep_for 720h
-        }
-        format json
-    }
+		6. [Optionally] Compare the SHA-256 reported by certutil with the sha256 value in bootstrap.json. Stop if they differ.
+
+		Then run:
+
+		  7. .\icstools.exe bootstrap
+
+		Bootstrap is only for the first installation of ICS Tools. If Tooling is already installed, just skip all the above steps and use:
+
+		  8. icstools upgrade
+
+		Bootstrap does not initialize an environment.
+		Add --yes to accept prerequisite installation without a separate confirmation.
+		After bootstrap completes, open a new elevated Command Prompt so the updated machine PATH is available.
+		Initialize the host environment separately:
+
+		  9. icstools config init
+
+		Select the environment interactively, or use:
+
+		  icstools config init --environment <environment>
+
+		for non-interactive provisioning.
+
+		Valid environments:
+		  Development
+		  Test
+		  QA
+		  QaS
+		  QaO
+		  Production
+		EOF 200
+	}
+	# OpenBao UI
+	handle /ui/* {
+		reverse_proxy openbao:8200
+	}
+	# OpenBao API
+	handle /v1/* {
+		reverse_proxy openbao:8200
+	}
+
+	# Artifact server (static files under /data/ics/*)
+	handle_path /data/ics/* {
+		root * /data/ics
+		file_server browse
+	}
+
+	# ICS PKI Provisioning API
+	handle_path /ics/pki/* {
+		reverse_proxy ics-pki-provisioning:8787
+	}
+
+	# Security: only allow downloads, no directory traversal
+	@blocked path /../*
+	respond @blocked 403
+
+	# Keycloak gets everything else
+	handle {
+		reverse_proxy icsauth-srv:8080 {
+			# Preserve original request headers for Keycloak
+			header_up Host {host}
+			header_up X-Forwarded-Host {host}
+			header_up X-Forwarded-Proto https
+			header_up X-Forwarded-Port 443
+		}
+	}
+
+	# Structured JSON logging with rotation (mirrors service-level)
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10MB
+			roll_keep 7
+			roll_keep_for 720h
+		}
+		format json
+	}
 }

@@ -12,7 +12,13 @@ services:
       #- ./site:/srv
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - ics-network
 
 volumes:
   caddy_data:
   caddy_config:
+
+networks:
+  ics-network:
+    name: ics-network

@@ -7,57 +7,50 @@ services:
     extends:
       file: ../../service-level/keycloak/docker-compose.yml
       service: keycloak
-    networks:
-      - auth-server-network
-
+  
   postgres:
     extends:
       file: ../../service-level/keycloak/docker-compose.yml
       service: postgres
-    networks:
-      - auth-server-network
-
+    
+  caddy:
+    extends:
+      file: ../../service-level/keycloak/docker-compose.yml
+      service: caddy
+    image: caddy-cloudflare:2
+    build:
+      context: .
+      dockerfile: ../../../images/caddy/Dockerfile
+    environment:
+      CF_API_TOKEN: ${CF_API_TOKEN}
+    volumes:
+      # we need to override the Caddyfile: host path to the orchestration-specific Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Artifact server: host path where release zips/manifests are placed
+      - /data/ics:/data/ics:ro
+  
   # OpenBao needs its orchestration-specific config so the public URL matches the proxy host
   openbao:
     extends:
       file: ../../service-level/openbao/docker-compose.yml
       service: openbao
-    volumes:
-      - openbao-data:/openbao/data
-      - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
-    networks:
-      - auth-server-network
     
   ics-pki-provisioning:
     extends:
       file: ../../service-level/ics-pki-provisioning/docker-compose.yml
       service: ics-pki-provisioning
-    volumes:
-      - /data/ics/cert-provisioning:/data/ics/cert-provisioning
-      - /data/ics/cert-bundles:/data/ics/cert-bundles
-    networks:
-      - auth-server-network
-
-  caddy:
-    extends:
-      file: ../../service-level/keycloak/docker-compose.yml
-      service: caddy
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-      # Artifact server: host path where release zips/manifests are placed
-      - /data/ics:/data/ics:ro
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - auth-server-network
 
 volumes:
-  data-ics-auth-server:
-  openbao-data:
-  caddy_data:
-  caddy_config:
+  icsauth-srv-data:
+    name: icsauth-srv-data
+  icsproxy-data:
+    name: icsproxy-data
+  icsproxy-config:
+    name: icsproxy-config 
+  icscert-srv-data:
+    external: true
+    name: icscert-srv-data
 
 networks:
-  auth-server-network:
+  ics-network:
+    name: ics-network

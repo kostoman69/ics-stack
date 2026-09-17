@@ -1,7 +1,7 @@
 services:
   openbao:
     image: openbao/openbao:2.5.4
-    container_name: openbao
+    container_name: icscert-srv
     restart: unless-stopped
 
     command: server -config=/etc/openbao/bao.hcl
@@ -10,8 +10,15 @@ services:
       - IPC_LOCK
 
     volumes:
-      - openbao-data:/openbao/data
+      - icscert-srv-data:/openbao/data
       - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
+    networks:
+      - ics-network
 
 volumes:
-  openbao-data:
+  icscert-srv-data:
+    name: icscert-srv-data
+
+networks:
+  ics-network:
+    name: ics-network
