@@ -13,11 +13,29 @@ services:
       ICS_OPENBAO_TOKEN: ${ICS_OPENBAO_TOKEN:?Set ICS_OPENBAO_TOKEN in environment or .env}
       ICS_PKI_PUBLIC_BASE_URL: ${ICS_PKI_PUBLIC_BASE_URL:-https://icsauth.net/ics/pki}
       ICS_OPENBAO_TIMEOUT_SECONDS: ${ICS_OPENBAO_TIMEOUT_SECONDS:-30}
+      ICS_PKI_LETSENCRYPT_ENABLED: ${ICS_PKI_LETSENCRYPT_ENABLED:-true}
+      ICS_PKI_ICSSUITE_ZONE: ${ICS_PKI_ICSSUITE_ZONE:-icssuite.gr}
+      ICS_PKI_ACME_DIRECTORY_URL: ${ICS_PKI_ACME_DIRECTORY_URL:-https://acme-staging-v02.api.letsencrypt.org/directory}
+      ICS_PKI_ACME_ALLOW_PRODUCTION: ${ICS_PKI_ACME_ALLOW_PRODUCTION:-false}
+      # Caddy's ACME storage is the icsproxy-data named volume (see service-level/keycloak/docker-compose.yml),
+      # not a host path -- mounted read-only below at /caddy-data. Caddy's own XDG_DATA_HOME=/data
+      # puts its storage at /data/caddy inside its own container, hence the /caddy/ suffix here.
+      ICS_PKI_CADDY_DATA_DIR: ${ICS_PKI_CADDY_DATA_DIR:-/caddy-data/caddy}
+      ICS_PKI_CADDY_ADMIN_URL: ${ICS_PKI_CADDY_ADMIN_URL:-}
+      # caddy is the compose service name on the shared ics-network; icssuite.gr is served on the
+      # standard port (443), not the 8444 used only by the isolated Phase0 staging rehearsal.
+      ICS_PKI_CADDY_PROBE_HOST: ${ICS_PKI_CADDY_PROBE_HOST:-caddy}
+      ICS_PKI_CADDY_PROBE_PORT: ${ICS_PKI_CADDY_PROBE_PORT:-443}
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
+      - icsproxy-data:/caddy-data:ro
     networks:
       - ics-network
+
+volumes:
+  icsproxy-data:
+    name: icsproxy-data
 
 networks:
   ics-network:

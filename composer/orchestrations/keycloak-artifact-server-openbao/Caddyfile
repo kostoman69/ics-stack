@@ -1,3 +1,13 @@
+{
+	# Gate for on-demand TLS below: Caddy asks this before issuing a cert for any
+	# {target}.icssuite.gr hostname it doesn't already have one for. Without this, on-demand
+	# TLS would issue a cert for ANY SNI hostname a client presents -- pki-provisioning only
+	# answers 2xx for a target explicitly marked letsEncryptEnabled in cert-targets.json.
+	on_demand_tls {
+		ask http://ics-pki-provisioning:8787/certificates/letsencrypt/ondemand-ask
+	}
+}
+
 icssuite.gr {
 	# TLS 1.2+ with ACME via Cloudflare DNS-01 (HTTP-01 is unreliable behind CF proxy)
 	tls {
@@ -11,6 +21,25 @@ icssuite.gr {
 	}
 
 	respond "icssuite.gr is up and running ..." 200
+}
+
+*.icssuite.gr {
+	# One individual DNS-01 cert per exact hostname, issued the first time Caddy sees that SNI
+	# and the on_demand_tls ask gate above allows it -- not a single wildcard cert. This Caddy
+	# instance doesn't serve real hospital traffic for these hostnames; it's purely the
+	# issuance point pki-provisioning reads the result back from (see icsproxy-data volume).
+	tls {
+		protocols tls1.2 tls1.3
+		issuer acme {
+			preferred_chains {
+				root_common_name "ISRG Root X1"
+			}
+			dns cloudflare {env.CF_API_TOKEN}
+		}
+		on_demand
+	}
+
+	respond "OK" 200
 }
 
 icsauth.net {
