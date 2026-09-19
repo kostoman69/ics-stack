@@ -12,6 +12,9 @@ services:
     volumes:
       - icscert-srv-data:/openbao/data
       - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
+    tmpfs:
+      - /openbao/file
+      - /openbao/logs
     networks:
       - ics-network
 
