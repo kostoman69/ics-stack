@@ -17,7 +17,7 @@ services:
     extends:
       file: ../../service-level/keycloak/docker-compose.yml
       service: caddy
-    image: caddy-cloudflare:2
+    image: caddy:2.11.4-r1
     build:
       context: .
       dockerfile: ../../../images/caddy/Dockerfile
