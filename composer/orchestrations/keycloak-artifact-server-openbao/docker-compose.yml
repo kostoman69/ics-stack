@@ -35,10 +35,10 @@ services:
       file: ../../service-level/openbao/docker-compose.yml
       service: openbao
     
-  ics-pki-provisioning:
+  icspki:
     extends:
       file: ../../service-level/ics-pki-provisioning/docker-compose.yml
-      service: ics-pki-provisioning
+      service: icspki
 
 volumes:
   icsauth-srv-data:

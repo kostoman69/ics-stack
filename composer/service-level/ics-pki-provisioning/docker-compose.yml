@@ -1,8 +1,8 @@
 services:
-  ics-pki-provisioning:
+  icspki:
     image: ${ICS_PKI_IMAGE:-forth-ics-pki-provisioning:latest}
     platform: ${ICS_PKI_PLATFORM:-linux/amd64}
-    container_name: ics-pki-provisioning
+    container_name: icspki
     restart: unless-stopped
     ports:
       - "127.0.0.1:8787:8787"

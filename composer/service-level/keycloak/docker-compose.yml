@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: icsauth-srv-database
+    container_name: icsauthdb
     restart: unless-stopped 
     volumes:
       - icsauth-srv-data:/var/lib/postgresql/data
@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: ../../../images/keycloak/Dockerfile
-    container_name: icsauth-srv
+    container_name: icsauth
     depends_on:
       - postgres
       - caddy
@@ -57,7 +57,7 @@ services:
     build:
       context: .
       dockerfile: ../../../images/caddy/Dockerfile
-    container_name: ics-proxy
+    container_name: icsproxy
     restart: unless-stopped
     environment:
       CF_API_TOKEN: ${CF_API_TOKEN}

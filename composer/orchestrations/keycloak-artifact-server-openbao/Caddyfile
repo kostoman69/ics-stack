@@ -4,7 +4,7 @@
 	# TLS would issue a cert for ANY SNI hostname a client presents -- pki-provisioning only
 	# answers 2xx for a target explicitly marked letsEncryptEnabled in cert-targets.json.
 	on_demand_tls {
-		ask http://ics-pki-provisioning:8787/certificates/letsencrypt/ondemand-ask
+		ask http://icspki:8787/certificates/letsencrypt/ondemand-ask
 	}
 }
 
@@ -138,7 +138,7 @@ icsauth.net {
 
 	# ICS PKI Provisioning API
 	handle_path /ics/pki/* {
-		reverse_proxy ics-pki-provisioning:8787
+		reverse_proxy icspki:8787
 	}
 
 	# Security: only allow downloads, no directory traversal
@@ -147,7 +147,7 @@ icsauth.net {
 
 	# Keycloak gets everything else
 	handle {
-		reverse_proxy icsauth-srv:8080 {
+		reverse_proxy icsauth:8080 {
 			# Preserve original request headers for Keycloak
 			header_up Host {host}
 			header_up X-Forwarded-Host {host}

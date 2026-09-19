@@ -1,7 +1,7 @@
 services:
   openbao:
     image: openbao/openbao:2.5.4
-    container_name: icscert-srv
+    container_name: icscert
     restart: unless-stopped
 
     command: server -config=/etc/openbao/bao.hcl
