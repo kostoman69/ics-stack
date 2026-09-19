@@ -39,4 +39,5 @@ volumes:
 
 networks:
   ics-network:
+    external: true
     name: ics-network
