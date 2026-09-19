@@ -5,7 +5,7 @@ services:
     container_name: icsauthdb
     restart: unless-stopped 
     volumes:
-      - icsauth-srv-data:/var/lib/postgresql/data
+      - icsauth-volume:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: ${POSTGRES_USER}
@@ -69,18 +69,18 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       #- ./site:/srv
-      - icsproxy-data:/data
-      - icsproxy-config:/config
+      - icsproxy-volume:/data
+      - icsproxy-conf-volume:/config
     networks:
       - ics-network
 
 volumes:
-  icsauth-srv-data:
-    name: icsauth-srv-data
-  icsproxy-data:
-    name: icsproxy-data
-  icsproxy-config:
-    name: icsproxy-config 
+  icsauth-volume:
+    name: icsauth-volume
+  icsproxy-volume:
+    name: icsproxy-volume
+  icsproxy-conf-volume:
+    name: icsproxy-conf-volume 
 
 networks:
   ics-network:

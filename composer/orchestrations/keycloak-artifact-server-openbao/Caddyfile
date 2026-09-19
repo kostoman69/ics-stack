@@ -27,7 +27,7 @@ icssuite.gr {
 	# One individual DNS-01 cert per exact hostname, issued the first time Caddy sees that SNI
 	# and the on_demand_tls ask gate above allows it -- not a single wildcard cert. This Caddy
 	# instance doesn't serve real hospital traffic for these hostnames; it's purely the
-	# issuance point pki-provisioning reads the result back from (see icsproxy-data volume).
+	# issuance point pki-provisioning reads the result back from (see icsproxy-volume volume).
 	tls {
 		protocols tls1.2 tls1.3
 		issuer acme {

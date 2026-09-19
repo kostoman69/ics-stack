@@ -10,7 +10,7 @@ services:
       - IPC_LOCK
 
     volumes:
-      - icscert-srv-data:/openbao/data
+      - icscert-volume:/openbao/data
       - ./config/bao.hcl:/etc/openbao/bao.hcl:ro
     tmpfs:
       - /openbao/file
@@ -19,8 +19,8 @@ services:
       - ics-network
 
 volumes:
-  icscert-srv-data:
-    name: icscert-srv-data
+  icscert-volume:
+    name: icscert-volume
 
 networks:
   ics-network:

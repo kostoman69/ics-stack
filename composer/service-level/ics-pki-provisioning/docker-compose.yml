@@ -17,7 +17,7 @@ services:
       ICS_PKI_ICSSUITE_ZONE: ${ICS_PKI_ICSSUITE_ZONE:-icssuite.gr}
       ICS_PKI_ACME_DIRECTORY_URL: ${ICS_PKI_ACME_DIRECTORY_URL:-https://acme-staging-v02.api.letsencrypt.org/directory}
       ICS_PKI_ACME_ALLOW_PRODUCTION: ${ICS_PKI_ACME_ALLOW_PRODUCTION:-false}
-      # Caddy's ACME storage is the icsproxy-data named volume (see service-level/keycloak/docker-compose.yml),
+      # Caddy's ACME storage is the icsproxy-volume named volume (see service-level/keycloak/docker-compose.yml),
       # not a host path -- mounted read-only below at /caddy-data. Caddy's own XDG_DATA_HOME=/data
       # puts its storage at /data/caddy inside its own container, hence the /caddy/ suffix here.
       ICS_PKI_CADDY_DATA_DIR: ${ICS_PKI_CADDY_DATA_DIR:-/caddy-data/caddy}
@@ -29,13 +29,13 @@ services:
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
-      - icsproxy-data:/caddy-data:ro
+      - icsproxy-volume:/caddy-data:ro
     networks:
       - ics-network
 
 volumes:
-  icsproxy-data:
-    name: icsproxy-data
+  icsproxy-volume:
+    name: icsproxy-volume
 
 networks:
   ics-network:

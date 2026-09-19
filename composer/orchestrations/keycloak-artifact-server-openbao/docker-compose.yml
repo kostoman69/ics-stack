@@ -41,15 +41,15 @@ services:
       service: icspki
 
 volumes:
-  icsauth-srv-data:
-    name: icsauth-srv-data
-  icsproxy-data:
-    name: icsproxy-data
-  icsproxy-config:
-    name: icsproxy-config 
-  icscert-srv-data:
+  icsauth-volume:
+    name: icsauth-volume
+  icsproxy-volume:
+    name: icsproxy-volume
+  icsproxy-conf-volume:
+    name: icsproxy-conf-volume 
+  icscert-volume:
     external: true
-    name: icscert-srv-data
+    name: icscert-volume
 
 networks:
   ics-network:
