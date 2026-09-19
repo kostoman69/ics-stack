@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:latest as builder
+FROM quay.io/keycloak/keycloak:26.7.4 as builder
 ###
 # Στο σημείο αυτό θα παραμετροποιήσω το keycloak image χρησιμοποιώντας build options (βλέπε σχόλιο παρακάτω)
 # Enable health and metrics support
@@ -25,7 +25,7 @@ WORKDIR /opt/keycloak
 # As a result, Keycloak avoids checking for and running a build directly at startup, which saves time.
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:latest
+FROM quay.io/keycloak/keycloak:26.7.4
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
