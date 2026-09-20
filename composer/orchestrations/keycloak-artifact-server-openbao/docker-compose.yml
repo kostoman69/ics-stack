@@ -23,6 +23,9 @@ services:
       dockerfile: ../../../images/caddy/Dockerfile
     environment:
       CF_API_TOKEN: ${CF_API_TOKEN}
+      # Same variable as the icspki service, so Caddy (which requests the certs) and icspki (which
+      # reads them back from the matching storage folder) can never point at different CAs.
+      ICS_PKI_ACME_DIRECTORY_URL: ${ICS_PKI_ACME_DIRECTORY_URL:-https://acme-v02.api.letsencrypt.org/directory}
     volumes:
       # we need to override the Caddyfile: host path to the orchestration-specific Caddyfile
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
