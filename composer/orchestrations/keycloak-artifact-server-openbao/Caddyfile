@@ -31,11 +31,10 @@ icssuite.gr {
 	tls {
 		protocols tls1.2 tls1.3
 		issuer acme {
-			# Must match ICS_PKI_ACME_DIRECTORY_URL in the icspki service: pki-provisioning reads the
-			# cert back from Caddy's storage folder for that exact directory, so a mismatch means
-			# the cert is issued but never found. Staging until Phase 3 (production cutover) --
-			# switch both together.
-			dir https://acme-staging-v02.api.letsencrypt.org/directory
+			# CA comes from the same ICS_PKI_ACME_DIRECTORY_URL the icspki service uses (both containers get it
+			# from compose): icspki reads the issued cert from the storage folder of exactly this CA, so the
+			# two must agree. Switch staging/production by changing that one variable.
+			dir {$ICS_PKI_ACME_DIRECTORY_URL}
 			preferred_chains {
 				root_common_name "ISRG Root X1"
 			}
