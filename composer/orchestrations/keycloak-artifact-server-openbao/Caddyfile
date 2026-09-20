@@ -83,16 +83,16 @@ icsauth.net {
 		-------------------------------------------------------
 		Run these commands from an elevated Command Prompt:
 
-		  1. cd "to a folder of your preference, usally a temp folder "
+		  1. cd "to a folder of your preference, usually a temp folder "
 		  2. curl.exe -fL https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip -o icstools-bootstrap-win-x64.zip
-		     [Alteratively, for Windows Server Versions < 2019 where curl.exe and tar.exe are not installed]
+		     [Alternatively, for Windows Server Versions < 2019 where curl.exe and tar.exe are not installed]
 		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip" -OutFile "icstools-bootstrap-win-x64.zip"
 		  3. curl.exe -fL https://icsauth.net/data/ics/11-tooling/bootstrap.json -o bootstrap.json
-		     [Alteratively]
+		     [Alternatively]
 		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/bootstrap.json" -OutFile bootstrap.json
 		  4. [Optionally] certutil.exe -hashfile icstools-bootstrap-win-x64.zip SHA256
 		  5. tar.exe -xf icstools-bootstrap-win-x64.zip
-		     [Alteratively, unzip the file icstools-bootstrap-win-x64.zip]
+		     [Alternatively, unzip the file icstools-bootstrap-win-x64.zip]
 
 		6. [Optionally] Compare the SHA-256 reported by certutil with the sha256 value in bootstrap.json. Stop if they differ.
 
