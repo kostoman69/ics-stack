@@ -1,6 +1,6 @@
 services:
   icspki:
-    image: ${ICS_PKI_IMAGE:-icspki:26.9.2}
+    image: ${ICS_PKI_IMAGE:-icspki:26.9.3}
     platform: ${ICS_PKI_PLATFORM:-linux/amd64}
     container_name: icspki
     restart: unless-stopped
