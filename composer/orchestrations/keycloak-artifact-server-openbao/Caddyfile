@@ -72,58 +72,13 @@ icsauth.net {
 		respond "ICS artifact server" 200
 	}
 
+	# Detailed, human-facing install/upgrade instructions (including offline/air-gapped
+	# bootstrap) live as a static page next to this Caddyfile, not inline here -- see
+	# ./static/bootstrap.html. Keep Docs/CICD/working/runbook.md §3/§8 aligned with it.
 	handle /ics/bootstrap {
-	header Content-Type "text/plain; charset=utf-8"
-
-	respond <<EOF
-		ICS INSTALLATION AND UPGRADE RUNBOOK - QUICK REFERENCE
-
-		First installation of ICS Tools on a clean Windows host
-		-------------------------------------------------------
-		Run these commands from an elevated Command Prompt:
-
-		  1. cd "to a folder of your preference, usally a temp folder "
-		  2. curl.exe -fL https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip -o icstools-bootstrap-win-x64.zip
-		     [Alteratively, for Windows Server Versions < 2019 where curl.exe and tar.exe are not installed]
-		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip" -OutFile "icstools-bootstrap-win-x64.zip"
-		  3. curl.exe -fL https://icsauth.net/data/ics/11-tooling/bootstrap.json -o bootstrap.json
-		     [Alteratively]
-		     Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/bootstrap.json" -OutFile bootstrap.json
-		  4. [Optionally] certutil.exe -hashfile icstools-bootstrap-win-x64.zip SHA256
-		  5. tar.exe -xf icstools-bootstrap-win-x64.zip
-		     [Alteratively, unzip the file icstools-bootstrap-win-x64.zip]
-
-		6. [Optionally] Compare the SHA-256 reported by certutil with the sha256 value in bootstrap.json. Stop if they differ.
-
-		Then run:
-
-		  7. .\icstools.exe bootstrap
-
-		Bootstrap is only for the first installation of ICS Tools. If Tooling is already installed, just skip all the above steps and use:
-
-		  8. icstools upgrade
-
-		Bootstrap does not initialize an environment.
-		Add --yes to accept prerequisite installation without a separate confirmation.
-		After bootstrap completes, open a new elevated Command Prompt so the updated machine PATH is available.
-		Initialize the host environment separately:
-
-		  9. icstools config init
-
-		Select the environment interactively, or use:
-
-		  icstools config init --environment <environment>
-
-		for non-interactive provisioning.
-
-		Valid environments:
-		  Development
-		  Test
-		  QA
-		  QaS
-		  QaO
-		  Production
-		EOF 200
+		root * /srv/ics-static
+		rewrite * /bootstrap.html
+		file_server
 	}
 	# OpenBao UI
 	handle /ui/* {

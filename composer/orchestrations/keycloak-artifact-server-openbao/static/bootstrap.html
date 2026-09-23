@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICS Tools — Installation &amp; Upgrade</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --text: #1c2230;
+    --text-muted: #5b6472;
+    --border: #e2e5ea;
+    --accent: #2555c7;
+    --accent-ink: #ffffff;
+    --code-bg: #101521;
+    --code-text: #e7ebf3;
+    --code-border: #232a3b;
+    --warn-bg: #fff6e5;
+    --warn-border: #e9c46a;
+    --warn-text: #6a4c00;
+    --ok-bg: #eaf7ee;
+    --ok-border: #8fd19e;
+    --ok-text: #1c6b34;
+    --pill-bg: #eef1f7;
+    --pill-text: #364152;
+    --shadow: 0 1px 2px rgba(20, 24, 33, 0.06), 0 8px 24px rgba(20, 24, 33, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218;
+      --panel: #171b24;
+      --text: #e7ebf3;
+      --text-muted: #9aa4b6;
+      --border: #262c3a;
+      --accent: #6c9bff;
+      --accent-ink: #0b1220;
+      --code-bg: #0a0d14;
+      --code-text: #dbe4f5;
+      --code-border: #232a3b;
+      --warn-bg: #2a2310;
+      --warn-border: #6b5417;
+      --warn-text: #f0c96b;
+      --ok-bg: #10261a;
+      --ok-border: #245a38;
+      --ok-text: #7fd6a0;
+      --pill-bg: #202636;
+      --pill-text: #c3cbdb;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+  header.page {
+    margin-bottom: 2rem;
+  }
+  header.page h1 {
+    font-size: 1.7rem;
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.01em;
+  }
+  header.page p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.98rem;
+  }
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0 2.25rem;
+    box-shadow: var(--shadow);
+  }
+  nav.toc div.label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding-left: 1.1rem;
+    columns: 2;
+    column-gap: 1.5rem;
+  }
+  nav.toc li { break-inside: avoid; margin-bottom: 0.3rem; }
+  nav.toc a { color: var(--accent); text-decoration: none; font-size: 0.92rem; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    scroll-margin-top: 1rem;
+  }
+  section > h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    margin: 0 0 0.35rem;
+  }
+  section > h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex: none;
+  }
+  section > p.lead {
+    color: var(--text-muted);
+    margin: 0 0 1.1rem;
+    font-size: 0.96rem;
+  }
+  h3.step {
+    font-size: 0.98rem;
+    margin: 1.4rem 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h3.step .pill {
+    background: var(--pill-bg);
+    color: var(--pill-text);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    margin: 0.5rem 0 0.9rem;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  p code, li code, td code {
+    background: var(--pill-bg);
+    color: var(--pill-text);
+    padding: 0.1rem 0.35rem;
+    border-radius: 5px;
+    font-size: 0.88em;
+  }
+  .comment { color: #8b93a3; }
+  .callout {
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0.9rem 0;
+    font-size: 0.92rem;
+    border: 1px solid var(--border);
+  }
+  .callout.warn {
+    background: var(--warn-bg);
+    border-color: var(--warn-border);
+    color: var(--warn-text);
+  }
+  .callout.ok {
+    background: var(--ok-bg);
+    border-color: var(--ok-border);
+    color: var(--ok-text);
+  }
+  .callout strong { display: inline-block; margin-bottom: 0.15rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 0.5rem 0 0.25rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  ul.env-list {
+    columns: 3;
+    margin: 0.4rem 0 0;
+    padding-left: 1.1rem;
+  }
+  ul.env-list li { break-inside: avoid; }
+  footer.page {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-top: 2.5rem;
+  }
+  @media (max-width: 560px) {
+    nav.toc ol { columns: 1; }
+    ul.env-list { columns: 1; }
+    section { padding: 1.25rem 1.1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>ICS Tools — Installation &amp; Upgrade</h1>
+    <p>Quick reference for bootstrapping <code>icstools</code> on a Windows host, initializing an environment, and installing or upgrading the ICS Backend — online or fully offline.</p>
+  </header>
+
+  <nav class="toc" aria-label="On this page">
+    <div class="label">On this page</div>
+    <ol>
+      <li><a href="#prereqs">Prerequisites</a></li>
+      <li><a href="#install">First installation (online)</a></li>
+      <li><a href="#init">Initialize the host environment</a></li>
+      <li><a href="#backend">First Backend installation</a></li>
+      <li><a href="#upgrade">Upgrading icstools and the Backend</a></li>
+      <li><a href="#offline">Offline / air-gapped installation</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+  </nav>
+
+  <section id="prereqs">
+    <h2><span class="num">1</span>Prerequisites</h2>
+    <p class="lead">Confirm these before starting, whether the host is connected or offline.</p>
+    <ul>
+      <li>64-bit Windows Server, from an <strong>elevated</strong> (Run as Administrator) console.</li>
+      <li>HTTPS access to <code>icsauth.net</code> — or an approved offline-media process (see <a href="#offline">Offline installation</a>).</li>
+      <li>The target environment name and installation root already decided.</li>
+      <li>Service-account and Api database-provider information on hand, for <code>config init</code>.</li>
+      <li>IIS, URL Rewrite, and ARR installed when the host uses an IIS reverse proxy.</li>
+      <li>The <strong>.NET 10 Hosting Bundle</strong> — <code>icstools bootstrap</code> installs it automatically when the host has internet access; otherwise install it by hand first (see <a href="#offline">Offline installation</a>).</li>
+    </ul>
+  </section>
+
+  <section id="install">
+    <h2><span class="num">2</span>First installation (online)</h2>
+    <p class="lead">Run once, on a host with internet access, to install <code>icstools</code> itself. This does not install the Backend or initialize an environment — see the next sections.</p>
+
+    <h3 class="step"><span class="pill">STEP 1</span>Download and verify the bootstrap package</h3>
+    <pre><span class="comment"># from an elevated Command Prompt, in a working folder of your choice</span>
+curl.exe -fL https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip -o icstools-bootstrap-win-x64.zip
+curl.exe -fL https://icsauth.net/data/ics/11-tooling/bootstrap.json -o bootstrap.json
+certutil.exe -hashfile icstools-bootstrap-win-x64.zip SHA256</pre>
+    <p>Compare the reported SHA-256 against the <code>sha256</code> value in <code>bootstrap.json</code>. <strong>Stop and re-download if they differ</strong> — do not run a package with a mismatched hash.</p>
+    <div class="callout warn">
+      <strong>Windows Server &lt; 2019</strong> — <code>curl.exe</code> and <code>tar.exe</code> may not be present. Use PowerShell instead:
+      <pre>Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/icstools-bootstrap-win-x64.zip" -OutFile "icstools-bootstrap-win-x64.zip"
+Invoke-WebRequest -Uri "https://icsauth.net/data/ics/11-tooling/bootstrap.json" -OutFile "bootstrap.json"</pre>
+    </div>
+
+    <h3 class="step"><span class="pill">STEP 2</span>Extract and run bootstrap</h3>
+    <pre>tar.exe -xf icstools-bootstrap-win-x64.zip
+<span class="comment"># or unzip icstools-bootstrap-win-x64.zip through Explorer if tar.exe is unavailable</span>
+.\icstools.exe bootstrap</pre>
+    <p>Installs <code>icstools.exe</code> to <code>C:\opt\ics\bin</code>, adds it to the machine <code>PATH</code>, and installs the .NET 10 Hosting Bundle if it isn't present yet. Add <code>--yes</code> to accept prerequisite installation without an extra confirmation prompt.</p>
+    <div class="callout ok">
+      <strong>Already installed?</strong> Skip both steps above and just run <code>icstools upgrade</code> instead — see <a href="#upgrade">Upgrading</a>.
+    </div>
+    <p><strong>Open a new elevated console</strong> after bootstrap completes, so the updated <code>PATH</code> is visible.</p>
+  </section>
+
+  <section id="init">
+    <h2><span class="num">3</span>Initialize the host environment</h2>
+    <p class="lead">Bootstrap only installs the tool — it never touches ICS configuration by itself. Run this separately, on every host:</p>
+    <pre>icstools config init</pre>
+    <p>Prompts interactively for the environment, or run non-interactively with:</p>
+    <pre>icstools config init --environment &lt;environment&gt;</pre>
+    <p>Valid environments:</p>
+    <ul class="env-list">
+      <li>Development</li>
+      <li>Test</li>
+      <li>QA</li>
+      <li>QaS</li>
+      <li>QaO</li>
+      <li>Production</li>
+    </ul>
+  </section>
+
+  <section id="backend">
+    <h2><span class="num">4</span>First Backend installation</h2>
+    <p class="lead">Api, App, and Cnx are always installed, upgraded, and rolled back together as one aligned release. Host-managed Backend commands are available only on a configured <strong>Production</strong> host — Development/Test/QA Backend deployment is pipeline-managed, not host-managed.</p>
+    <pre>icstools backend versions
+icstools backend upgrade
+icstools backend status</pre>
+    <p>To install an explicitly approved build instead of the latest:</p>
+    <pre>icstools backend upgrade --build 854</pre>
+    <p><code>backend upgrade</code> shows "current → target" and asks for confirmation before doing anything, unless <code>--yes</code>/<code>-y</code> is given.</p>
+  </section>
+
+  <section id="upgrade">
+    <h2><span class="num">5</span>Upgrading icstools and the Backend</h2>
+    <h3 class="step"><span class="pill">TOOLING</span>icstools itself</h3>
+    <pre>icstools upgrade --check   <span class="comment"># see what's available, change nothing</span>
+icstools upgrade           <span class="comment"># interactive upgrade</span>
+icstools upgrade status    <span class="comment"># durable status of the last attempt</span></pre>
+    <p>Use <code>icstools upgrade --yes</code> for an unattended, already-approved upgrade. On Windows, the elevated updater records durable status under <code>C:\ProgramData\FORTH\ICS\Tooling\Updates</code>.</p>
+
+    <h3 class="step"><span class="pill">BACKEND</span>Api / App / Cnx</h3>
+    <p>In Production, prefer <code>/tools/version</code> in the App itself. From the command line:</p>
+    <pre>icstools backend versions
+icstools backend upgrade
+icstools backend status
+icstools backend rollback     <span class="comment"># repoints to the nearest aligned older release</span></pre>
+    <div class="callout warn">
+      <strong>Environment boundary</strong> — <code>backend</code> commands derive the configured host identity and run only on Production; they never accept <code>--environment</code>/<code>--env</code>. Use the matching Azure deployment pipeline with an explicit BuildId for Test/QA. Bootstrap and <code>config init</code> remain available for provisioning those environments.
+    </div>
+  </section>
+
+  <section id="offline">
+    <h2><span class="num">6</span>Offline / air-gapped installation</h2>
+    <p class="lead">For a host with no network access at all, everything above still applies — you just fetch each artifact on a connected machine first, transfer it through your approved offline-media process (USB or similar), then run the same commands with one extra flag.</p>
+
+    <h3 class="step"><span class="pill">PHASE A</span>On a machine with internet access</h3>
+    <ol>
+      <li>Download and verify the <code>icstools</code> bootstrap package exactly as in <a href="#install">Step 1 above</a> (zip + <code>bootstrap.json</code> + SHA-256 check).</li>
+      <li>Download the .NET 10 Hosting Bundle installer — the offline target cannot reach Microsoft's servers, so <code>icstools bootstrap</code> can't fetch it there:
+        <pre>curl.exe -fL https://aka.ms/dotnet/10.0/dotnet-hosting-win.exe -o dotnet-hosting-10.0-win.exe</pre>
+      </li>
+      <li>If the host also needs the ICS Backend, build an offline installation bundle for the approved build:
+        <pre>icstools backend pack --build 854 --out ics-backend-854.zip</pre>
+        This bundles the target build together with any compatibility-bridge releases it declares, and its release notes when published.
+      </li>
+    </ol>
+
+    <h3 class="step"><span class="pill">PHASE B</span>Transfer</h3>
+    <p>Copy everything gathered in Phase A to the target host through your organization's approved offline-media process. Keep the transferred media until acceptance and rollback checks complete.</p>
+
+    <h3 class="step"><span class="pill">PHASE C</span>On the offline target host (elevated console)</h3>
+    <pre><span class="comment"># .NET 10 Hosting Bundle — install manually first (double-click, or silently):</span>
+dotnet-hosting-10.0-win.exe /quiet /norestart
+
+<span class="comment"># Tooling — --skip-runtime asserts the prerequisite was handled separately;</span>
+<span class="comment"># it does not waive the requirement, so install the Hosting Bundle first.</span>
+tar.exe -xf icstools-bootstrap-win-x64.zip
+.\icstools.exe bootstrap --skip-runtime
+icstools config init --environment Production</pre>
+    <p>If the Backend is also needed:</p>
+    <pre>mkdir D:\ics-backend-854
+tar.exe -xf ics-backend-854.zip -C D:\ics-backend-854
+icstools backend upgrade --offline-bundle D:\ics-backend-854</pre>
+
+    <div class="callout warn">
+      <strong>Tooling upgrades have no offline-bundle option.</strong> Unlike <code>backend upgrade</code>, plain <code>icstools upgrade</code> does not accept <code>--offline-bundle</code>. To move an offline host to a newer <code>icstools</code> release later, repeat Phase A/B/C above with the newer bootstrap package — <code>icstools bootstrap</code> detects the existing install and simply tells you to run <code>icstools upgrade</code> instead, so on an air-gapped host, replace the binary and <code>appsettings.json</code> in <code>C:\opt\ics\bin</code> by hand from a freshly downloaded bootstrap package, or coordinate with the platform team for an approved manual-copy procedure.
+    </div>
+  </section>
+
+  <section id="troubleshooting">
+    <h2><span class="num">7</span>Troubleshooting</h2>
+    <table>
+      <thead><tr><th>Symptom</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td>Bootstrap package hash mismatch</td><td>Delete the package and download it again — do not run a package that fails verification.</td></tr>
+        <tr><td>.NET Hosting Bundle install fails</td><td>Install the prerequisite manually, reboot if required, then rerun <code>icstools bootstrap</code> (or <code>--skip-runtime</code> once it's confirmed installed).</td></tr>
+        <tr><td><code>icstools upgrade</code> fails</td><td>Inspect <code>icstools upgrade status</code>; fix the reported elevation, filesystem, or verification problem. Do not repair the installation junction by hand.</td></tr>
+        <tr><td>Host configuration step fails</td><td>Correct the reported account, ACL, service, registry, or IIS problem, then rerun the same idempotent command.</td></tr>
+        <tr><td>Release server unreachable</td><td>Check DNS, TLS, proxy, and firewall from this host; if it's genuinely air-gapped, use the offline procedure above instead.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="page">
+    ICS Tools · served from <code>icsauth.net/ics/bootstrap</code> · this page is also mirrored in the internal ICS Installation and Upgrade Operator Runbook
+  </footer>
+
+</div>
+</body>
+</html>

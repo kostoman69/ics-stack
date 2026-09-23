@@ -29,6 +29,9 @@ services:
     volumes:
       # we need to override the Caddyfile: host path to the orchestration-specific Caddyfile
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Static pages served by this Caddyfile (currently just the /ics/bootstrap runbook page) --
+      # versioned alongside the Caddyfile itself, not uploaded by the release pipeline like /data/ics.
+      - ./static:/srv/ics-static:ro
       # Artifact server: host path where release zips/manifests are placed
       - /data/ics:/data/ics:ro
   
