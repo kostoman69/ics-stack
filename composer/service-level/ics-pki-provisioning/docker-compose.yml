@@ -1,6 +1,6 @@
 services:
   icspki:
-    image: ${ICS_PKI_IMAGE:-icspki:26.9.3}
+    image: ${ICS_PKI_IMAGE:-icspki:26.10.2}
     platform: ${ICS_PKI_PLATFORM:-linux/amd64}
     container_name: icspki
     restart: unless-stopped
@@ -26,9 +26,14 @@ services:
       # standard port (443), not the 8444 used only by the isolated Phase0 staging rehearsal.
       ICS_PKI_CADDY_PROBE_HOST: ${ICS_PKI_CADDY_PROBE_HOST:-caddy}
       ICS_PKI_CADDY_PROBE_PORT: ${ICS_PKI_CADDY_PROBE_PORT:-443}
+      ICS_PKI_BACKEND_RELEASE_PATH: /data/ics/11-backend
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
+      # Read-only: this service only reports disk usage on the backend release artifact folder,
+      # never writes to it -- the artifact server (Caddy, see keycloak-artifact-server-openbao)
+      # owns actual writes.
+      - /data/ics/11-backend:/data/ics/11-backend:ro
       - icsproxy-volume:/caddy-data:ro
     networks:
       - ics-network
