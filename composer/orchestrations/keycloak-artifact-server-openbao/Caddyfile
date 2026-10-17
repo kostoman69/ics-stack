@@ -1,10 +1,10 @@
 {
 	# Gate for on-demand TLS below: Caddy asks this before issuing a cert for any
 	# {target}.icssuite.gr hostname it doesn't already have one for. Without this, on-demand
-	# TLS would issue a cert for ANY SNI hostname a client presents -- pki-provisioning only
+	# TLS would issue a cert for ANY SNI hostname a client presents -- Operations Service only
 	# answers 2xx for a target explicitly marked letsEncryptEnabled in cert-targets.json.
 	on_demand_tls {
-		ask http://icspki:8787/certificates/letsencrypt/ondemand-ask
+		ask http://icsops:8787/certificates/letsencrypt/ondemand-ask
 	}
 }
 
@@ -27,14 +27,14 @@ icssuite.gr {
 	# One individual DNS-01 cert per exact hostname, issued the first time Caddy sees that SNI
 	# and the on_demand_tls ask gate above allows it -- not a single wildcard cert. This Caddy
 	# instance doesn't serve real hospital traffic for these hostnames; it's purely the
-	# issuance point pki-provisioning reads the result back from (see icsproxy-volume volume).
+	# issuance point Operations Service reads the result back from (see icsproxy-volume volume).
 	tls {
 		protocols tls1.2 tls1.3
 		issuer acme {
-			# CA comes from the same ICS_PKI_ACME_DIRECTORY_URL the icspki service uses (both containers get it
-			# from compose): icspki reads the issued cert from the storage folder of exactly this CA, so the
+			# CA comes from the same ICS_OPS_ACME_DIRECTORY_URL the icsops service uses (both containers get it
+			# from compose): icsops reads the issued cert from the storage folder of exactly this CA, so the
 			# two must agree. Switch staging/production by changing that one variable.
-			dir {$ICS_PKI_ACME_DIRECTORY_URL}
+			dir {$ICS_OPS_ACME_DIRECTORY_URL}
 			preferred_chains {
 				root_common_name "ISRG Root X1"
 			}
@@ -65,7 +65,7 @@ icsauth.net {
 	# Exact redirects first
 	redir /ui /ui/ 302
 	redir /bao /ui/ 302
-	redir /ics/pki /ics/pki/ 302
+	redir /ics/ops /ics/ops/ 302
 
 	# Optional friendly response for root path checks.
 	handle / {
@@ -95,9 +95,9 @@ icsauth.net {
 		file_server browse
 	}
 
-	# ICS PKI Provisioning API
-	handle_path /ics/pki/* {
-		reverse_proxy icspki:8787
+	# ICS Operations Service API
+	handle_path /ics/ops/* {
+		reverse_proxy icsops:8787
 	}
 
 	# Security: only allow downloads, no directory traversal

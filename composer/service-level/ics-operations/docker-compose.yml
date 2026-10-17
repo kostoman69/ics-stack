@@ -1,0 +1,56 @@
+services:
+  icsops:
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.3}
+    platform: ${ICS_OPS_PLATFORM:-linux/amd64}
+    container_name: icsops
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      ICS_OPS_API_KEY: ${ICS_OPS_API_KEY:-}
+      ICS_OPS_TARGET_CONFIG: /data/ics/cert-provisioning/cert-targets.json
+      ICS_OPS_KV_CERT_ROOT: /kv/certificates
+      ICS_OPENBAO_BASE_URL: ${ICS_OPENBAO_BASE_URL:-http://openbao:8200}
+      ICS_OPENBAO_TOKEN: ${ICS_OPENBAO_TOKEN:?Set ICS_OPENBAO_TOKEN in environment or .env}
+      ICS_OPS_PUBLIC_BASE_URL: ${ICS_OPS_PUBLIC_BASE_URL:-https://icsauth.net/ics/ops}
+      ICS_OPENBAO_TIMEOUT_SECONDS: ${ICS_OPENBAO_TIMEOUT_SECONDS:-30}
+      ICS_OPS_LETSENCRYPT_ENABLED: ${ICS_OPS_LETSENCRYPT_ENABLED:-true}
+      ICS_OPS_ICSSUITE_ZONE: ${ICS_OPS_ICSSUITE_ZONE:-icssuite.gr}
+      ICS_OPS_ACME_DIRECTORY_URL: ${ICS_OPS_ACME_DIRECTORY_URL:-https://acme-v02.api.letsencrypt.org/directory}
+      ICS_OPS_ACME_ALLOW_PRODUCTION: ${ICS_OPS_ACME_ALLOW_PRODUCTION:-true}
+      # Caddy's ACME storage is the icsproxy-volume named volume (see service-level/keycloak/docker-compose.yml),
+      # not a host path -- mounted read-only below at /caddy-data. Caddy's own XDG_DATA_HOME=/data
+      # puts its storage at /data/caddy inside its own container, hence the /caddy/ suffix here.
+      ICS_OPS_CADDY_DATA_DIR: ${ICS_OPS_CADDY_DATA_DIR:-/caddy-data/caddy}
+      ICS_OPS_CADDY_ADMIN_URL: ${ICS_OPS_CADDY_ADMIN_URL:-}
+      # caddy is the compose service name on the shared ics-network; icssuite.gr is served on the
+      # standard port (443), not the 8444 used only by the isolated Phase0 staging rehearsal.
+      ICS_OPS_CADDY_PROBE_HOST: ${ICS_OPS_CADDY_PROBE_HOST:-caddy}
+      ICS_OPS_CADDY_PROBE_PORT: ${ICS_OPS_CADDY_PROBE_PORT:-443}
+      ICS_OPS_BACKEND_RELEASE_PATH: ${ICS_OPS_BACKEND_RELEASE_PATH:-/data/ics/11-backend}
+      ICS_OPS_EXPIRY_WARN_DAYS: ${ICS_OPS_EXPIRY_WARN_DAYS:-30}
+      ICS_OPS_DISK_WARN_PERCENT: ${ICS_OPS_DISK_WARN_PERCENT:-85}
+      ICS_OPS_DISK_CRITICAL_PERCENT: ${ICS_OPS_DISK_CRITICAL_PERCENT:-95}
+      ICS_OPS_CADDY_PROBE_TIMEOUT_SECONDS: ${ICS_OPS_CADDY_PROBE_TIMEOUT_SECONDS:-120}
+      ICS_OPS_CADDY_STORAGE_POLL_SECONDS: ${ICS_OPS_CADDY_STORAGE_POLL_SECONDS:-2}
+      ICS_OPS_CADDY_STORAGE_WAIT_SECONDS: ${ICS_OPS_CADDY_STORAGE_WAIT_SECONDS:-30}
+      ICS_OPS_CADDY_RENEW_WAIT_SECONDS: ${ICS_OPS_CADDY_RENEW_WAIT_SECONDS:-150}
+    volumes:
+      - /data/ics/cert-provisioning:/data/ics/cert-provisioning
+      - /kv/certificates:/kv/certificates
+      # Read-only: this service only reports disk usage on the backend release artifact folder,
+      # never writes to it -- the artifact server (Caddy, see keycloak-artifact-server-openbao)
+      # owns actual writes.
+      - /data/ics/11-backend:/data/ics/11-backend:ro
+      - icsproxy-volume:/caddy-data:ro
+    networks:
+      - ics-network
+
+volumes:
+  icsproxy-volume:
+    name: icsproxy-volume
+
+networks:
+  ics-network:
+    external: true
+    name: ics-network

@@ -1,5 +1,16 @@
 # ics-stack Folder Structure
 
+## Release identity
+
+`version.json` owns this stack's independent calendar version, initially `26.10.1`. `CHANGELOG.md`
+records changes, breaking changes, deployment and compatibility in one file. Individual container
+images retain their own versions. The first entry is a draft, not deployment acceptance.
+
+When working from the ICS repository, use `containers update changelog extend` or
+`containers update changelog seam and bump version`. Authoritative action definitions are in
+`.github/instructions/operations-releases.instructions.md` in that repository. Sealing requires
+the accepted commit from this separate Containers repository, not a commit from its parent checkout.
+
 This repository contains all containerization assets for this project. Use this as the universal, portable structure for all future projects.
 
 ## Structure Overview
@@ -25,6 +36,9 @@ ics-stack/
 ## Usage
 
 ### Running an Orchestration
+
+For the release server, follow the ordered deployment section below. For an already prepared
+environment with its required images, secrets, volumes and network available:
 
 ```bash
 cd composer/orchestrations/keycloak-artifact-server-openbao/
@@ -52,3 +66,96 @@ If you only need part of the repository, you can enable sparse checkout after cl
 ---
 
 **Adopt this structure for all containerized projects for consistency and portability.**
+
+## Operations Service
+
+The full orchestration includes `icsops`, an image-based ICS Operations Service at port 8787.
+Its service definition is `composer/service-level/ics-operations/docker-compose.yml`; image
+selection uses `ICS_OPS_IMAGE=icsops:26.10.3`. The public Caddy prefix is `/ics/ops`.
+
+The application image is built from `icsOps/Forth.Ics.Operations` in the ICS source repository.
+Propagate this container repository to the release-server checkout before running the Operations
+image deployment task. The task never pushes or pulls this repository. Keep the protected stack
+`.env` configured with `ICS_OPS_*` variables and existing `ICS_OPENBAO_*` credentials. Named volumes
+and certificate/config bind mounts must be preserved.
+
+Procedure: CICD / working / ICS Operations Service deployment.
+
+## Release-server deployment
+
+### 1. Publish the reviewed stack and update the server checkout
+
+This folder is a separate Git repository. After its reviewed changes have been committed and
+pushed to `ics-stack`, run on the release server:
+
+```sh
+cd /home/administrator/ics-stack
+git status --short
+git pull --ff-only
+python3 -c 'import json; print(json.load(open("version.json"))["version"])'
+```
+
+Resolve local configuration-source changes before pulling; do not discard them or overwrite a
+protected environment file to make the pull succeed. Updating the parent ICS repository alone
+does not update this checkout. The Operations image task does not push/pull it either.
+
+### 2. Prepare the protected environment
+
+```sh
+cd composer/orchestrations/keycloak-artifact-server-openbao
+test -f .env || install -m 600 .env.example .env
+```
+
+Edit `.env` with the real deployment values before continuing. Preserve existing database/admin,
+Cloudflare and OpenBao credentials. Configure `ICS_OPS_IMAGE=icsops:26.10.3`, the actual
+`ICS_OPS_PLATFORM`, the `/ics/ops` public base URL, the intended ACME policy and the shared mutation
+key where required. The template is a checklist, not a file to copy over an existing live `.env`.
+Do not commit or print secrets. Keep OpenBao unsealed for Operations readiness.
+
+```sh
+docker compose config --quiet
+docker compose config --services
+```
+
+Expect `keycloak`, `postgres`, `caddy`, `openbao` and `icsops`. Review every service before using
+`--remove-orphans`: it removes project containers absent from this full orchestration.
+Keep the existing `ics-network`, named volumes, target catalog and certificate archives. On a
+fresh host, create the external `ics-network` and `icscert-volume` and follow the complete
+OpenBao/bootstrap runbook before expecting the stack to be ready.
+
+### 3. Make images available and apply the intended services
+
+For this Operations rollout, first complete the image build/export/copy/deploy steps in
+`icsOps/Forth.Ics.Operations/README.md` from the ICS repository. Its deployment script recreates
+`icsops`, applies/reloads Caddy, and verifies the new service. It does not deliberately restart
+Keycloak, PostgreSQL or OpenBao. Caddy recreation briefly interrupts proxied routes.
+
+For a separate full-stack update, after every selected image has been built, loaded or pulled
+as appropriate, run from the server orchestration directory:
+
+```sh
+docker compose up -d --remove-orphans
+docker compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile
+docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+docker compose ps
+```
+
+A full-stack update may recreate Keycloak and other changed services; schedule the interruption.
+Do not use `down -v`. Image selection and the stack version are independent: changing
+`version.json` does not build, load or deploy any image.
+
+### 4. Verify and retain rollback material
+
+```sh
+curl --fail --silent --show-error https://icsauth.net/ics/ops/version
+curl --fail --silent --show-error https://icsauth.net/ics/ops/health/ready
+```
+
+Expect Operations version `26.10.3` and readiness `ok`. Verify Keycloak login, OpenBao availability,
+artifact downloads and the matching App/Tooling clients. Keep the preceding accepted stack
+revision, protected configuration backups and images. Roll back matched stack/proxy/client
+configuration together when their contract changes; restore data only through the appropriate
+database/OpenBao backup procedure, never by deleting volumes.
+
+Full operational context: CICD / working / ICS Operations Service deployment and
+CICD / working / ICS Release Server Container Stack.
