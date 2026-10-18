@@ -1,13 +1,24 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.3}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.5}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
     ports:
       - "127.0.0.1:8787:8787"
     environment:
-      ICS_OPS_API_KEY: ${ICS_OPS_API_KEY:-}
+      # Caddy owns access logs; avoid duplicate raw OIDC callback query logging.
+      UVICORN_ACCESS_LOG: "false"
+      ICS_OPS_API_KEY: ${ICS_OPS_API_KEY:?Set a protected ICS_OPS_API_KEY before deploying Operations}
+      # Empty client ID keeps browser sign-in disabled until Keycloak is provisioned.
+      ICS_OPS_DASHBOARD_CLIENT_ID: ${ICS_OPS_DASHBOARD_CLIENT_ID:-}
+      ICS_OPS_DASHBOARD_CLIENT_SECRET: ${ICS_OPS_DASHBOARD_CLIENT_SECRET:-}
+      ICS_OPS_DASHBOARD_ISSUER: ${ICS_OPS_DASHBOARD_ISSUER:-https://icsauth.net/realms/ics}
+      ICS_OPS_DASHBOARD_URL: ${ICS_OPS_DASHBOARD_URL:-https://icsauth.net/operations}
+      ICS_OPS_DASHBOARD_IDP: ${ICS_OPS_DASHBOARD_IDP:-shibboleth}
+      ICS_OPS_ARTIFACT_HEALTH_URL: ${ICS_OPS_ARTIFACT_HEALTH_URL:-https://icsauth.net/data/ics/11-backend/}
+      ICS_OPS_POSTGRES_PROBE_HOST: ${ICS_OPS_POSTGRES_PROBE_HOST:-postgres}
+      ICS_OPS_POSTGRES_PROBE_PORT: ${ICS_OPS_POSTGRES_PROBE_PORT:-5432}
       ICS_OPS_TARGET_CONFIG: /data/ics/cert-provisioning/cert-targets.json
       ICS_OPS_KV_CERT_ROOT: /kv/certificates
       ICS_OPENBAO_BASE_URL: ${ICS_OPENBAO_BASE_URL:-http://openbao:8200}

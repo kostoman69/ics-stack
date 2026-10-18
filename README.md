@@ -71,7 +71,14 @@ If you only need part of the repository, you can enable sparse checkout after cl
 
 The full orchestration includes `icsops`, an image-based ICS Operations Service at port 8787.
 Its service definition is `composer/service-level/ics-operations/docker-compose.yml`; image
-selection uses `ICS_OPS_IMAGE=icsops:26.10.3`. The public Caddy prefix is `/ics/ops`.
+selection uses `ICS_OPS_IMAGE=icsops:26.10.5`. The public Caddy prefix is `/ics/ops`.
+
+The read-only administrative dashboard uses `/operations`. The matching Caddyfile preserves
+that path and forwards it to `icsops`. Follow the Operations project README to create the
+`ics-operations` Keycloak public PKCE client, including its access-token audience mapper, then set
+`ICS_OPS_DASHBOARD_CLIENT_ID=ics-operations` in the protected orchestration `.env`. The template
+leaves it empty so sign-in remains disabled until setup is complete. Shibboleth authentication
+and the existing `ito_admin` role are required; machine API clients retain `/ics/ops`.
 
 The application image is built from `icsOps/Forth.Ics.Operations` in the ICS source repository.
 Propagate this container repository to the release-server checkout before running the Operations
@@ -92,6 +99,7 @@ pushed to `ics-stack`, run on the release server:
 cd /home/administrator/ics-stack
 git status --short
 git pull --ff-only
+# It reads version.json in the current directory and prints its "version" value.
 python3 -c 'import json; print(json.load(open("version.json"))["version"])'
 ```
 
@@ -107,9 +115,9 @@ test -f .env || install -m 600 .env.example .env
 ```
 
 Edit `.env` with the real deployment values before continuing. Preserve existing database/admin,
-Cloudflare and OpenBao credentials. Configure `ICS_OPS_IMAGE=icsops:26.10.3`, the actual
-`ICS_OPS_PLATFORM`, the `/ics/ops` public base URL, the intended ACME policy and the shared mutation
-key where required. The template is a checklist, not a file to copy over an existing live `.env`.
+Cloudflare and OpenBao credentials. Configure `ICS_OPS_IMAGE=icsops:26.10.5`, the actual
+`ICS_OPS_PLATFORM`, the `/ics/ops` public base URL, the intended ACME policy and the required `ICS_OPS_API_KEY`. Configure matching App, Tooling
+and Linux machine credentials before rollout; sensitive reads and downloads now require them. The template is a checklist, not a file to copy over an existing live `.env`.
 Do not commit or print secrets. Keep OpenBao unsealed for Operations readiness.
 
 ```sh
@@ -147,11 +155,11 @@ Do not use `down -v`. Image selection and the stack version are independent: cha
 ### 4. Verify and retain rollback material
 
 ```sh
-curl --fail --silent --show-error https://icsauth.net/ics/ops/version
-curl --fail --silent --show-error https://icsauth.net/ics/ops/health/ready
+curl --fail --silent --show-error https://icsauth.net/ics/ops/version -H "X-ICS-OPS-Key: ${ICS_OPS_API_KEY:?Set the protected Operations key}"
+curl --fail --silent --show-error https://icsauth.net/ics/ops/health/ready -H "X-ICS-OPS-Key: ${ICS_OPS_API_KEY:?Set the protected Operations key}"
 ```
 
-Expect Operations version `26.10.3` and readiness `ok`. Verify Keycloak login, OpenBao availability,
+Expect Operations version `26.10.5` and readiness `ok`. Verify Keycloak login, OpenBao availability,
 artifact downloads and the matching App/Tooling clients. Keep the preceding accepted stack
 revision, protected configuration backups and images. Roll back matched stack/proxy/client
 configuration together when their contract changes; restore data only through the appropriate

@@ -96,7 +96,16 @@ icsauth.net {
 	}
 
 	# ICS Operations Service API
+	@operations_dashboard path /operations /operations/*
+	handle @operations_dashboard {
+		reverse_proxy icsops:8787
+	}
+
+	# Existing machine API prefix is stripped before forwarding.
 	handle_path /ics/ops/* {
+		# This callback is only for Caddy's direct internal request to icsops:8787.
+		@internal_callback path /certificates/letsencrypt/ondemand-ask*
+		respond @internal_callback 404
 		reverse_proxy icsops:8787
 	}
 
@@ -122,6 +131,13 @@ icsauth.net {
 			roll_keep 7
 			roll_keep_for 720h
 		}
-		format json
+		format filter {
+			wrap json
+			request>headers>X-Ics-Ops-Key delete
+			request>uri query {
+				delete code
+				delete state
+			}
+		}
 	}
 }
