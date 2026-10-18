@@ -1,5 +1,34 @@
 # Containers Changelog
 
+## 26.10.2
+
+Status: Draft
+Source: Stack changes in 8e505f1..8263f5e plus this release-metadata correction; no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.5` instead of `26.10.3`.
+- Route `/operations` and its child paths to the dashboard without stripping the path. Forward its Keycloak/OIDC and health-probe settings; leave sign-in disabled until the dedicated client is configured.
+- Block the internal Caddy certificate-approval callback at the public `/ics/ops` proxy while preserving Caddy's direct internal callback.
+- Remove the machine-key header and OIDC callback code/state values from Caddy access logs; disable duplicate raw Uvicorn access logging.
+
+### Breaking changes
+
+- Require a nonempty `ICS_OPS_API_KEY` before Compose deployment. Configure matching App, Tooling and Linux machine credentials before switching to Operations 26.10.5; sensitive reads, downloads, preflight and mutations now require them.
+
+### Deployment
+
+- Update `/home/administrator/ics-stack` to this stack revision before deploying the existing `icsops:26.10.5` image. Configure the protected environment and dedicated Keycloak client before enabling dashboard sign-in.
+- Compose validation passed. Callback routing and log filtering passed in a disposable local Caddy 2.11.1 runtime; production Caddy 2.11.4-r1 validation and live deployment acceptance remain pending.
+- This release updates stack configuration and metadata; it does not rebuild the Operations image or establish successful deployment.
+
+### Compatibility
+
+- Containers version `26.10.2` selects Operations image `icsops:26.10.5`; the two products keep independent versions.
+- Existing certificate storage and volumes are preserved. Existing machine callers must supply the shared key.
+
+---
+
 ## 26.10.1
 
 Status: Draft
@@ -13,27 +42,23 @@ This first entry records the current stack configuration, not changes reconstruc
 - Define the shared release-server stack: Keycloak, PostgreSQL, Caddy, OpenBao and ICS Operations Service.
 - Serve release artifacts and the bootstrap page through Caddy alongside Keycloak and OpenBao API/UI routing.
 - Route Operations through `/ics/ops` and Caddy certificate callbacks through `icsops:8787`.
-- Select Operations `26.10.5`; proxy its read-only dashboard at `/operations` without stripping the path. Forward dedicated OIDC and health-probe settings; leave sign-in disabled until its Keycloak client is configured.
-- Remove the custom machine-key header from Caddy access logs; preserve standard credential redaction, remove callback code/state query fields and disable duplicate raw Uvicorn access logs.
 - Coordinate Cloudflare DNS-01 certificate issuance with the Operations target-approval endpoint and shared Caddy certificate storage.
 - Configure Operations with `ICS_OPS_*` variables while preserving certificate/archive and named-volume storage.
 - Track the stack's independent version in `version.json` and release changes in this file.
 
 ### Breaking changes
 
-- Require a nonempty `ICS_OPS_API_KEY` before Compose deployment; coordinate matching App/Tooling/Linux credentials before switching to Operations 26.10.5. Block the internal Caddy approval callback at the public API proxy.
-
 - Deploy the Operations service identity, proxy routes, environment configuration and matching clients together. Existing client URL overrides must target `/ics/ops`.
 
 ### Deployment
 
 - Propagate the reviewed stack to the release-server `ics-stack` checkout before running the Operations image-deployment task. Configure its protected environment using the full-stack template.
-- Compose model validation and unchanged certificate-storage checks passed locally. Callback routing and log filtering passed using a disposable local Caddy 2.11.1 runtime. Production Caddy 2.11.4-r1 validation and live deployment remain pending; no accepted stack commit is recorded.
+- Compose model validation and unchanged certificate-storage checks passed locally. Live deployment and Caddy runtime validation remain pending; no accepted stack commit is recorded.
 - Preserve named volumes and bind-mounted certificate data. Never use `down -v` for this deployment.
 - Use the full `keycloak-artifact-server-openbao` orchestration and its protected `.env`; the image task does not synchronize this separate Git repository.
 
 ### Compatibility
 
-- Current source selections: `keycloak:26.7.4-r1`, `caddy:2.11.4-r1`, `openbao/openbao:2.5.4`, `icsops:26.10.5`.
+- Current source selections: `keycloak:26.7.4-r1`, `caddy:2.11.4-r1`, `openbao/openbao:2.5.4`, `icsops:26.10.3`.
 - PostgreSQL currently uses `postgres:latest`. This is a floating reference, not evidence of a reproducible accepted image set; its deployed identity has not been verified for this draft.
-- Match App `IcsPki:ProvisioningBaseUrl` and Tooling `ICS_OPS_URL` to `https://icsauth.net/ics/ops`, with the required shared machine key for sensitive reads, downloads, preflight and mutations.
+- Match App `IcsPki:ProvisioningBaseUrl` and Tooling `ICS_OPS_URL` to `https://icsauth.net/ics/ops`, with the configured shared mutation key where required.

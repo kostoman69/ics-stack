@@ -2,9 +2,10 @@
 
 ## Release identity
 
-`version.json` owns this stack's independent calendar version, initially `26.10.1`. `CHANGELOG.md`
+`version.json` owns this stack's independent calendar version, currently `26.10.2`. `CHANGELOG.md`
 records changes, breaking changes, deployment and compatibility in one file. Individual container
-images retain their own versions. The first entry is a draft, not deployment acceptance.
+images retain their own versions. Each stack release has its own section; the 26.10.1 entry is
+preserved below the 26.10.2 changes. Draft status does not establish deployment acceptance.
 
 When working from the ICS repository, use `containers update changelog extend` or
 `containers update changelog seam and bump version`. Authoritative action definitions are in
