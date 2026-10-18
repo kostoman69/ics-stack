@@ -3,7 +3,7 @@
 ## 26.10.2
 
 Status: Draft
-Source: Stack changes in 8e505f1..8263f5e plus this release-metadata correction; no deployment acceptance recorded.
+Source: Stack changes in 8e505f1..8263f5e plus release-metadata/documentation corrections; no deployment acceptance recorded.
 
 ### Changes
 
@@ -23,6 +23,8 @@ Source: Stack changes in 8e505f1..8263f5e plus this release-metadata correction;
 - This release updates stack configuration and metadata; it does not rebuild the Operations image or establish successful deployment.
 
 ### Compatibility
+
+- Source documentation correction: configure the App client through `IcsOperations:BaseUrl` and `IcsOperations:ApiKey`; the selected Operations image is not rebuilt.
 
 - Containers version `26.10.2` selects Operations image `icsops:26.10.5`; the two products keep independent versions.
 - Existing certificate storage and volumes are preserved. Existing machine callers must supply the shared key.
@@ -61,4 +63,4 @@ This first entry records the current stack configuration, not changes reconstruc
 
 - Current source selections: `keycloak:26.7.4-r1`, `caddy:2.11.4-r1`, `openbao/openbao:2.5.4`, `icsops:26.10.3`.
 - PostgreSQL currently uses `postgres:latest`. This is a floating reference, not evidence of a reproducible accepted image set; its deployed identity has not been verified for this draft.
-- Match App `IcsPki:ProvisioningBaseUrl` and Tooling `ICS_OPS_URL` to `https://icsauth.net/ics/ops`, with the configured shared mutation key where required.
+- Match the App service URL and Tooling `ICS_OPS_URL` to `https://icsauth.net/ics/ops`, with the configured shared mutation key where required.
