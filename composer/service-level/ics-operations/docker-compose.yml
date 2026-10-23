@@ -1,6 +1,6 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.5}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.6}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
@@ -46,6 +46,12 @@ services:
       ICS_OPS_CADDY_STORAGE_POLL_SECONDS: ${ICS_OPS_CADDY_STORAGE_POLL_SECONDS:-2}
       ICS_OPS_CADDY_STORAGE_WAIT_SECONDS: ${ICS_OPS_CADDY_STORAGE_WAIT_SECONDS:-30}
       ICS_OPS_CADDY_RENEW_WAIT_SECONDS: ${ICS_OPS_CADDY_RENEW_WAIT_SECONDS:-150}
+      # Tickets (Operations 26.10.6): SQLite database and attachments on the host volume below; attachments of
+      # tickets closed longer than the retention are removed daily (0 turns that off); operator tokens from ITO
+      # must name the dashboard client as audience (Keycloak mapper operations-tickets-audience on ics-ito).
+      ICS_OPS_TICKETS_ROOT: ${ICS_OPS_TICKETS_ROOT:-/data/ics/tickets}
+      ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS: ${ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS:-180}
+      ICS_OPS_TICKETS_AUDIENCE: ${ICS_OPS_TICKETS_AUDIENCE:-ics-operations}
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
@@ -53,6 +59,8 @@ services:
       # never writes to it -- the artifact server (Caddy, see keycloak-artifact-server-openbao)
       # owns actual writes.
       - /data/ics/11-backend:/data/ics/11-backend:ro
+      # Tickets database and attachments: must persist across redeploys; back up daily (tickets.db and files/).
+      - /data/ics/tickets:/data/ics/tickets
       - icsproxy-volume:/caddy-data:ro
     networks:
       - ics-network

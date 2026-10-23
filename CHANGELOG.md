@@ -1,5 +1,24 @@
 # Containers Changelog
 
+## 26.10.3 — 2026-10-23
+
+Status: Draft
+Source: Working tree after the published 26.10.2 (origin/main 112870d); no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.6` instead of `26.10.5` (tickets for CeHA Ops).
+- Mount `/data/ics/tickets` into `icsops` for the tickets database and attachments, and forward `ICS_OPS_TICKETS_ROOT`, `ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS` (default 180) and `ICS_OPS_TICKETS_AUDIENCE` (default `ics-operations`).
+
+### Deployment
+
+- Create `/data/ics/tickets` on the server before recreating `icsops` (the container runs as root). Without the mount the tickets would live in the container and be lost on the next redeploy.
+- Back up `tickets.db` (SQLite backup API) and `files/` daily; see Operations / working / Operations tickets §8.
+- Keycloak: realm role `ito_triage` and the `operations-tickets-audience` mapper on `ics-ito` (ICS repository `icsOps/Keycloak/clients/README.md` §5).
+- `docker compose config --quiet` passes locally for `keycloak-artifact-server-openbao` (secrets unset); not yet run on the server.
+
+---
+
 ## 26.10.2
 
 Status: Draft

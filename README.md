@@ -72,7 +72,7 @@ If you only need part of the repository, you can enable sparse checkout after cl
 
 The full orchestration includes `icsops`, an image-based ICS Operations Service at port 8787.
 Its service definition is `composer/service-level/ics-operations/docker-compose.yml`; image
-selection uses `ICS_OPS_IMAGE=icsops:26.10.5`. The public Caddy prefix is `/ics/ops`.
+selection uses `ICS_OPS_IMAGE=icsops:26.10.6`. The public Caddy prefix is `/ics/ops`.
 
 The read-only administrative dashboard uses `/operations`. The matching Caddyfile preserves
 that path and forwards it to `icsops`. Follow the Operations project README to create the
@@ -116,7 +116,7 @@ test -f .env || install -m 600 .env.example .env
 ```
 
 Edit `.env` with the real deployment values before continuing. Preserve existing database/admin,
-Cloudflare and OpenBao credentials. Configure `ICS_OPS_IMAGE=icsops:26.10.5`, the actual
+Cloudflare and OpenBao credentials. Configure `ICS_OPS_IMAGE=icsops:26.10.6`, the actual
 `ICS_OPS_PLATFORM`, the `/ics/ops` public base URL, the intended ACME policy and the required `ICS_OPS_API_KEY`. Configure matching App, Tooling
 and Linux machine credentials before rollout; sensitive reads and downloads now require them. The template is a checklist, not a file to copy over an existing live `.env`.
 Do not commit or print secrets. Keep OpenBao unsealed for Operations readiness.
@@ -160,7 +160,7 @@ curl --fail --silent --show-error https://icsauth.net/ics/ops/version -H "X-ICS-
 curl --fail --silent --show-error https://icsauth.net/ics/ops/health/ready -H "X-ICS-OPS-Key: ${ICS_OPS_API_KEY:?Set the protected Operations key}"
 ```
 
-Expect Operations version `26.10.5` and readiness `ok`. Verify Keycloak login, OpenBao availability,
+Expect Operations version `26.10.6` and readiness `ok`. Verify Keycloak login, OpenBao availability,
 artifact downloads and the matching App/Tooling clients. Keep the preceding accepted stack
 revision, protected configuration backups and images. Roll back matched stack/proxy/client
 configuration together when their contract changes; restore data only through the appropriate
