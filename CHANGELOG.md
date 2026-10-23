@@ -19,7 +19,7 @@ Source: Working tree after the published 26.10.2 (origin/main 112870d); no deplo
 
 ---
 
-## 26.10.2
+## 26.10.2 — 2026-10-19
 
 Status: Draft
 Source: Stack changes in 8e505f1..8263f5e plus release-metadata/documentation corrections; no deployment acceptance recorded.
@@ -50,11 +50,10 @@ Source: Stack changes in 8e505f1..8263f5e plus release-metadata/documentation co
 
 ---
 
-## 26.10.1
+## 26.10.1 — 2026-10-17
 
 Status: Draft
 Source: Initial working-tree baseline; no accepted release boundary established.
-Baseline date: 2026-10-17
 
 This first entry records the current stack configuration, not changes reconstructed from earlier releases.
 
