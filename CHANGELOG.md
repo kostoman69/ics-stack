@@ -20,8 +20,8 @@ Source: Working tree after the published 26.10.3 (origin/main 05b7d76, fb1e74b);
 
 ## 26.10.3 — 2026-10-23
 
-Status: Draft
-Source: Working tree after the published 26.10.2 (origin/main 112870d); no deployment acceptance recorded.
+Status: Sealed
+Source: Containers commit 05b7d76 (changelog headings fb1e74b), pulled and deployed on icsauth.net on 2026-10-23 with Operations 26.10.6; accepted by the user.
 
 ### Changes
 
