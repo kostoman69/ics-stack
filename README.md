@@ -87,7 +87,7 @@ image deployment task. The task never pushes or pulls this repository. Keep the 
 `.env` configured with `ICS_OPS_*` variables and existing `ICS_OPENBAO_*` credentials. Named volumes
 and certificate/config bind mounts must be preserved.
 
-Procedure: CICD / working / ICS Operations Service deployment.
+Procedure: Operations / working / ICS Operations Service deployment.
 
 ## Release-server deployment
 
@@ -170,5 +170,5 @@ Host disk report (dashboard «Where the rest of the disk goes»): `sudo mkdir -p
 `composer/service-level/ics-operations/host-disk-report.sh` once as root, then add the cron line from its header
 to root's crontab. It writes `/data/ics/host-report/disk-report.json`, which `icsops` mounts read-only.
 
-Full operational context: CICD / working / ICS Operations Service deployment and
-CICD / working / ICS Release Server Container Stack.
+Full operational context: Operations / working / ICS Operations Service deployment and
+Containers / working / ICS Release Server Container Stack.
