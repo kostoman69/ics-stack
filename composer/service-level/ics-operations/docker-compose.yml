@@ -1,6 +1,6 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.6}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.8}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
@@ -52,6 +52,9 @@ services:
       ICS_OPS_TICKETS_ROOT: ${ICS_OPS_TICKETS_ROOT:-/data/ics/tickets}
       ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS: ${ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS:-180}
       ICS_OPS_TICKETS_AUDIENCE: ${ICS_OPS_TICKETS_AUDIENCE:-ics-operations}
+      # Host disk report written by host-disk-report.sh (root cron on the server); the dashboard shows where the
+      # rest of the disk goes. Absent file: the dashboard says the report is not installed.
+      ICS_OPS_HOST_DISK_REPORT: ${ICS_OPS_HOST_DISK_REPORT:-/data/ics/host-report/disk-report.json}
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
@@ -61,6 +64,8 @@ services:
       - /data/ics/11-backend:/data/ics/11-backend:ro
       # Tickets database and attachments: must persist across redeploys; back up daily (tickets.db and files/).
       - /data/ics/tickets:/data/ics/tickets
+      # Read-only: the host report only; icsops never sees the rest of the host.
+      - /data/ics/host-report:/data/ics/host-report:ro
       - icsproxy-volume:/caddy-data:ro
     networks:
       - ics-network

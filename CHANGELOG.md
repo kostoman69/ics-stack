@@ -1,5 +1,23 @@
 # Containers Changelog
 
+## 26.10.4 — 2026-10-24
+
+Status: Draft
+Source: Working tree after the published 26.10.3 (origin/main 05b7d76, fb1e74b); no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.8` instead of `26.10.6`.
+- New `composer/service-level/ics-operations/host-disk-report.sh`: run from the server's root cron every 30 minutes, it writes the root filesystem's largest folders (two levels, `du -x`) and `docker system df` (with reclaimable space) to `/data/ics/host-report/disk-report.json`. It only measures; it never deletes.
+- Mount `/data/ics/host-report` read-only into `icsops` and forward `ICS_OPS_HOST_DISK_REPORT`, so the dashboard can show where the rest of the disk goes without giving the container access to the host.
+
+### Deployment
+
+- On the server: `sudo mkdir -p /data/ics/host-report`, run the script once by hand, then add the cron line from the script header to root's crontab.
+- Needs GNU `du`/`df` (coreutils) on the host; checked in an Alpine container with coreutils and a stub `docker`, valid JSON output. Not yet run on the server.
+
+---
+
 ## 26.10.3 — 2026-10-23
 
 Status: Draft
