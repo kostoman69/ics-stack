@@ -36,7 +36,8 @@ def now() -> str:
 
 def read_json(path: Path) -> dict:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        # utf-8-sig: VERSION.json and manifests may carry a BOM (Windows PowerShell 5.1).
+        value = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, ValueError):
         return {}
     return value if isinstance(value, dict) else {}
@@ -113,13 +114,29 @@ def apply(data_root: Path, state: Path, index_script: Path) -> dict | None:
                     "started_at": now(), "deleted": [], "refused": [], "index_rebuilt": [], "errors": []}
     changed: set[str] = set()
     deletions = request.get("deletions") if isinstance(request.get("deletions"), list) else []
+    checked: list[tuple[str, str, Path]] = []
     for item in deletions:
         root = str(item.get("root", "")) if isinstance(item, dict) else ""
         folder = str(item.get("folder", "")) if isinstance(item, dict) else ""
         path, reason = check(data_root, state, root, folder)
         if path is None:
             result["refused"].append({"root": root, "folder": folder, "reason": reason})
-            continue
+        else:
+            checked.append((root, folder, path))
+
+    # Independent safety net: never delete more than half of a root's build folders in one run, whatever was asked
+    # (a reading error once made Operations plan to delete every Backend build).
+    for root in ROOTS:
+        builds = [f for r, f, _ in checked if r == root and f.isdigit()]
+        try:
+            present = sum(1 for p in (data_root / root).iterdir() if p.name.isdigit() and p.is_dir() and not p.is_symlink())
+        except OSError:
+            present = 0
+        if builds and len(builds) * 2 > present:
+            result["errors"].append(f"{root}: {len(builds)} of {present} build folders requested · more than half, refused")
+            checked = [c for c in checked if c[0] != root]
+
+    for root, folder, path in checked:
         size = size_of(path)
         # Renamed first: a half-deleted build never stays visible under its build id.
         trash = path.with_name(f".deleting-{folder}")

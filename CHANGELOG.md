@@ -1,5 +1,26 @@
 # Containers Changelog
 
+## 26.10.6 — 2026-10-27
+
+Status: Draft
+Source: Working tree after the published 26.10.5 (origin/main 414ee58); no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.10` instead of `26.10.9`.
+- Fix: `artifact-retention-apply.py` reads JSON BOM-tolerant (`VERSION.json` and manifests are written with a BOM by the build pipeline).
+- Safety net: `artifact-retention-apply.py` never deletes more than half of a release root's build folders in one run, whatever the request lists; it records the refused root in `result.json` and exits 1.
+
+### Breaking changes
+
+None.
+
+### Deployment
+
+- `git pull` on the server; the cron line is unchanged. Covered by the Operations test suite (host-script tests); not yet run on the server.
+
+---
+
 ## 26.10.5 — 2026-10-27
 
 Status: Draft

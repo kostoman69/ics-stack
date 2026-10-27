@@ -1,6 +1,6 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.9}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.10}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
