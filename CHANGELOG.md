@@ -1,5 +1,29 @@
 # Containers Changelog
 
+## 26.10.5 — 2026-10-27
+
+Status: Draft
+Source: Working tree after the published 26.10.4 (origin/main a2be659); no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.9` instead of `26.10.8`.
+- New `composer/service-level/ics-operations/artifact-retention-apply.py` (root cron, every 10 minutes): executes the build retention run Operations requested in `/data/ics/retention/request.json`, checks every folder again (known root, build folder name, real folder inside the root, not `latest.json`, not the compatibility bridge, not pinned), deletes, rebuilds `versions.json` and writes `result.json`. Python 3 standard library only.
+- New `composer/service-level/ics-operations/ics-versions-index.sh`: the one `versions.json` rebuild for every writer; the publish pipeline uploads a copy next to each root's `latest.json`, the retention script uses the copy in this checkout. Writes next to the old index and renames it; mode 644, owner of the root folder when run as root.
+- `icsops` mounts `/data/ics/11-desk` and `/data/ics/11-tooling` read-only and `/data/ics/retention` read-write, and forwards `ICS_OPS_RETENTION_KEEP_LINES` (5) and `ICS_OPS_RETENTION_AUTO` (false).
+- Container log limits (`json-file`, 3 × 10 MB) for `postgres`, `keycloak`, `caddy`, `openbao` and `icsops`, so container logs cannot fill the disk.
+
+### Breaking changes
+
+None.
+
+### Deployment
+
+- On the server: `sudo mkdir -p /data/ics/retention`, add the cron line from the script header to root's crontab; recreate the containers (`docker compose up -d`) for the log limits to apply.
+- Scripts checked in an Ubuntu 24.04 container as root (dash `sh`, ownership kept) and by the Operations test suite; `docker compose config` resolves the orchestration. Not yet run on the server.
+
+---
+
 ## 26.10.4 — 2026-10-24
 
 Status: Draft

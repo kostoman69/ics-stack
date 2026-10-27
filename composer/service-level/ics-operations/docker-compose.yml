@@ -1,9 +1,15 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.8}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.9}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
+    # Container log rotation (Docker json-file): at most 3 × 10 MB per container, so logs can never fill the disk.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "127.0.0.1:8787:8787"
     environment:
@@ -55,13 +61,21 @@ services:
       # Host disk report written by host-disk-report.sh (root cron on the server); the dashboard shows where the
       # rest of the disk goes. Absent file: the dashboard says the report is not installed.
       ICS_OPS_HOST_DISK_REPORT: ${ICS_OPS_HOST_DISK_REPORT:-/data/ics/host-report/disk-report.json}
+      # Build retention: every build of the newest N lines (major.minor), plus latest.json, the compatibility bridge
+      # and pinned builds. Operations only plans and writes the run request; artifact-retention-apply.py (root cron on
+      # the host) deletes. AUTO=true adds a daily request on its own; off until the first runs were checked by hand.
+      ICS_OPS_RETENTION_KEEP_LINES: ${ICS_OPS_RETENTION_KEEP_LINES:-5}
+      ICS_OPS_RETENTION_AUTO: ${ICS_OPS_RETENTION_AUTO:-false}
     volumes:
       - /data/ics/cert-provisioning:/data/ics/cert-provisioning
       - /kv/certificates:/kv/certificates
-      # Read-only: this service only reports disk usage on the backend release artifact folder,
-      # never writes to it -- the artifact server (Caddy, see keycloak-artifact-server-openbao)
-      # owns actual writes.
+      # Read-only: this service reports disk usage on the release folders and plans build retention, but never writes
+      # to them -- the publish pipeline writes builds and artifact-retention-apply.py (host, root) deletes them.
       - /data/ics/11-backend:/data/ics/11-backend:ro
+      - /data/ics/11-desk:/data/ics/11-desk:ro
+      - /data/ics/11-tooling:/data/ics/11-tooling:ro
+      # Build retention state shared with the host script: pins.json and request.json (written here), result.json (host).
+      - /data/ics/retention:/data/ics/retention
       # Tickets database and attachments: must persist across redeploys; back up daily (tickets.db and files/).
       - /data/ics/tickets:/data/ics/tickets
       # Read-only: the host report only; icsops never sees the rest of the host.
