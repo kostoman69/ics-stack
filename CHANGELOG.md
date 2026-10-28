@@ -1,5 +1,27 @@
 # Containers Changelog
 
+## 26.10.7 — 2026-10-28
+
+Status: Draft
+Source: Working tree after the published 26.10.6 (origin/main a5ca3a9); no deployment acceptance recorded.
+
+### Changes
+
+- Select Operations `26.10.11` instead of `26.10.10`.
+- Remove the `/operations` Caddy route: Operations has no browser pages any more.
+- Forward `ICS_OPS_OPERATOR_ISSUER` instead of the five `ICS_OPS_DASHBOARD_*` variables (compose and `.env.example`).
+- README and script comments describe ITO as the only GUI.
+
+### Breaking changes
+
+- `/operations/**` is no longer routed. The `ICS_OPS_DASHBOARD_*` variables are no longer forwarded.
+
+### Deployment
+
+- `git pull` on the server, delete the `ICS_OPS_DASHBOARD_*` lines from the protected `.env`, deploy Operations 26.10.11. `docker compose config` resolves; the Caddyfile was not validated locally (needs the custom Caddy image).
+
+---
+
 ## 26.10.6 — 2026-10-27
 
 Status: Draft

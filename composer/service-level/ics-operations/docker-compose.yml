@@ -1,6 +1,6 @@
 services:
   icsops:
-    image: ${ICS_OPS_IMAGE:-icsops:26.10.10}
+    image: ${ICS_OPS_IMAGE:-icsops:26.10.11}
     platform: ${ICS_OPS_PLATFORM:-linux/amd64}
     container_name: icsops
     restart: unless-stopped
@@ -13,15 +13,12 @@ services:
     ports:
       - "127.0.0.1:8787:8787"
     environment:
-      # Caddy owns access logs; avoid duplicate raw OIDC callback query logging.
+      # Caddy owns access logs.
       UVICORN_ACCESS_LOG: "false"
       ICS_OPS_API_KEY: ${ICS_OPS_API_KEY:?Set a protected ICS_OPS_API_KEY before deploying Operations}
-      # Empty client ID keeps browser sign-in disabled until Keycloak is provisioned.
-      ICS_OPS_DASHBOARD_CLIENT_ID: ${ICS_OPS_DASHBOARD_CLIENT_ID:-}
-      ICS_OPS_DASHBOARD_CLIENT_SECRET: ${ICS_OPS_DASHBOARD_CLIENT_SECRET:-}
-      ICS_OPS_DASHBOARD_ISSUER: ${ICS_OPS_DASHBOARD_ISSUER:-https://icsauth.net/realms/ics}
-      ICS_OPS_DASHBOARD_URL: ${ICS_OPS_DASHBOARD_URL:-https://icsauth.net/operations}
-      ICS_OPS_DASHBOARD_IDP: ${ICS_OPS_DASHBOARD_IDP:-shibboleth}
+      # Issuer of the operator realm: ITO's calls for a person (tickets, build retention) carry its access token.
+      ICS_OPS_OPERATOR_ISSUER: ${ICS_OPS_OPERATOR_ISSUER:-https://icsauth.net/realms/ics}
+      # Probe targets of GET /health/stack (Caddy's probe uses the host of ICS_OPS_PUBLIC_BASE_URL).
       ICS_OPS_ARTIFACT_HEALTH_URL: ${ICS_OPS_ARTIFACT_HEALTH_URL:-https://icsauth.net/data/ics/11-backend/}
       ICS_OPS_POSTGRES_PROBE_HOST: ${ICS_OPS_POSTGRES_PROBE_HOST:-postgres}
       ICS_OPS_POSTGRES_PROBE_PORT: ${ICS_OPS_POSTGRES_PROBE_PORT:-5432}
@@ -52,14 +49,14 @@ services:
       ICS_OPS_CADDY_STORAGE_POLL_SECONDS: ${ICS_OPS_CADDY_STORAGE_POLL_SECONDS:-2}
       ICS_OPS_CADDY_STORAGE_WAIT_SECONDS: ${ICS_OPS_CADDY_STORAGE_WAIT_SECONDS:-30}
       ICS_OPS_CADDY_RENEW_WAIT_SECONDS: ${ICS_OPS_CADDY_RENEW_WAIT_SECONDS:-150}
-      # Tickets (Operations 26.10.6): SQLite database and attachments on the host volume below; attachments of
-      # tickets closed longer than the retention are removed daily (0 turns that off); operator tokens from ITO
-      # must name the dashboard client as audience (Keycloak mapper operations-tickets-audience on ics-ito).
+      # Tickets: SQLite database and attachments on the host volume below; attachments of tickets closed longer than
+      # the retention are removed daily (0 turns that off); operator tokens from ITO must carry the custom audience
+      # ics-operations (Keycloak mapper operations-tickets-audience on ics-ito).
       ICS_OPS_TICKETS_ROOT: ${ICS_OPS_TICKETS_ROOT:-/data/ics/tickets}
       ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS: ${ICS_OPS_TICKETS_ATTACHMENT_RETENTION_DAYS:-180}
       ICS_OPS_TICKETS_AUDIENCE: ${ICS_OPS_TICKETS_AUDIENCE:-ics-operations}
-      # Host disk report written by host-disk-report.sh (root cron on the server); the dashboard shows where the
-      # rest of the disk goes. Absent file: the dashboard says the report is not installed.
+      # Host disk report written by host-disk-report.sh (root cron on the server); ITO shows where the rest of the
+      # disk goes. Absent file: ITO says the report is not installed.
       ICS_OPS_HOST_DISK_REPORT: ${ICS_OPS_HOST_DISK_REPORT:-/data/ics/host-report/disk-report.json}
       # Build retention: every build of the newest N lines (major.minor), plus latest.json, the compatibility bridge
       # and pinned builds. Operations only plans and writes the run request; artifact-retention-apply.py (root cron on

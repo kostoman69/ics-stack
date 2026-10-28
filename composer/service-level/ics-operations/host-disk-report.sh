@@ -1,5 +1,5 @@
 #!/bin/sh
-# Host disk report for the Operations dashboard («Where the rest of the disk goes»).
+# Host disk report for ITO's Release server hygiene («Πού πάει ο υπόλοιπος δίσκος»).
 #
 # Runs on the release server as root from cron (every 30 minutes) and writes a small JSON file that the
 # icsops container reads through a read-only mount. icsops itself sees only its own folders; this keeps the
