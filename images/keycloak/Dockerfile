@@ -23,9 +23,14 @@ WORKDIR /opt/keycloak
 # Έτσι, όταν ξεκινάμε το keycloak χρησιμοποιούμε την παράμετρο --optimized
 # The --optimized parameter tells Keycloak to assume a pre-built, already optimized Keycloak image is used. 
 # As a result, Keycloak avoids checking for and running a build directly at startup, which saves time.
-RUN /opt/keycloak/bin/kc.sh build
+COPY --chown=keycloak:keycloak ics-theme.jar /opt/keycloak/providers/ics-theme.jar
+RUN touch -m --date=@1743465600 /opt/keycloak/providers/ics-theme.jar && /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:26.7.4
+ARG IMAGE_VERSION
+ARG THEME_SHA256
+LABEL org.opencontainers.image.version=$IMAGE_VERSION \
+      gr.forth.ics.theme.sha256=$THEME_SHA256
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]

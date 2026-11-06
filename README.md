@@ -2,10 +2,10 @@
 
 ## Release identity
 
-`version.json` owns this stack's independent calendar version, currently `26.10.2`. `CHANGELOG.md`
+`version.json` owns this stack's independent calendar version, currently `26.11.1`. `CHANGELOG.md`
 records changes, breaking changes, deployment and compatibility in one file. Individual container
-images retain their own versions. Each stack release has its own section; the 26.10.1 entry is
-preserved below the 26.10.2 changes. Draft status does not establish deployment acceptance.
+images retain their own versions. Each stack release has its own section, with preceding entries
+preserved. Draft status does not establish deployment acceptance.
 
 When working from the ICS repository, use `containers update changelog extend` or
 `containers update changelog seam and bump version`. Authoritative action definitions are in
@@ -174,3 +174,18 @@ that `icsops` writes there, checks each folder again, deletes and rebuilds `vers
 
 Full operational context: Operations / working / ICS Operations Service deployment and
 Containers / working / ICS Release Server Container Stack.
+
+## Themed Keycloak image delivery
+
+Build the ICS theme and its image through the parent ICS workspace's `Keycloak:` Run Tasks,
+implemented under `icsOps/Keycloak/scripts/`. The Dockerfile requires the validated `ics-theme.jar`
+in a staged context; a standalone Compose build is no longer the Keycloak build route. The jar is
+installed under providers before the optimized build. Component revision starts at 26.7.4-r2;
+stack release remains 26.11.1. These are separate versions.
+
+Propagate this reviewed repository to the server before invoking the task; it never pushes/pulls Git.
+`ICS_KEYCLOAK_IMAGE` in the protected orchestration `.env` selects the deployed tag, with r1 as the
+fallback until explicitly selected. The task checks image/archive identity, architecture and Compose
+ownership and recreates only Keycloak (`--no-deps --no-build`). It does not reload Caddy or recreate
+PostgreSQL, OpenBao or Operations. Retain the previous image and `.keycloak-previous.json` for the
+explicit Keycloak rollback task. See AuthN / working / ICS Keycloak theme development.

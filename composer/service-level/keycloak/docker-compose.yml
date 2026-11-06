@@ -22,10 +22,8 @@ services:
   keycloak:
     # Εδώ έχω μαζέψει όλα που κατά καιρούς έχω διαβάσει σε διάφορα άρθρα με βασικό οδηγό το official documentation του keycloak
     # Running Keycloak in a container [https://www.keycloak.org/server/containers]
-    image: keycloak:26.7.4-r1
-    build:
-      context: .
-      dockerfile: ../../../images/keycloak/Dockerfile
+    # Built/exported by the ICS workspace's dedicated Keycloak tasks, not Compose.
+    image: ${ICS_KEYCLOAK_IMAGE:-keycloak:26.7.4-r1}
     container_name: icsauth
     depends_on:
       - postgres
@@ -103,4 +101,3 @@ volumes:
 networks:
   ics-network:
     name: ics-network
-    

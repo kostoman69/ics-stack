@@ -1,5 +1,40 @@
 # Containers Changelog
 
+## 26.11.1 — 2026-11-07
+
+Status: Draft
+Source: After Containers commit c492197 (26.10.7); ICS theme and image-task integration verified locally. No deployment acceptance recorded.
+
+### Changes
+
+- Add dedicated ICS workspace Keycloak build/export/copy/deploy/rollback tasks. Compile the theme locally, validate the ICS login/email JAR, and embed it before optimized Keycloak construction in component image `keycloak:26.7.4-r2`; never rebuild an existing component tag.
+- Support protected `ICS_KEYCLOAK_IMAGE` selection, retaining `keycloak:26.7.4-r1` as fallback until an explicit deployment. Keycloak is image-only in Compose; its themed build uses a staged context from the ICS workspace.
+- Validate archive checksum, image identity/version, target architecture and Compose ownership before replacement. Recreate only Keycloak with `--no-deps --no-build`; retain the old image identity for an explicit rollback without reloading Caddy or recreating other live services.
+- Start the ICS Keycloak theme project in the ICS repository at `icsOps/Keycloak/ics-theme`, using Keycloakify 11, React, TypeScript, Vite and Storybook. Login and email themes share the name `ICS`; the Account and Admin Consoles are outside scope.
+- Document local development and JAR packaging for the Keycloak 26.7.4 target. The development foundation and shared browser chrome are implemented; remaining workflow/mobile and native-email acceptance are task work.
+- Correct the Containers README's current release identity.
+- Apply the App login chrome across Keycloakify login forms: clinician backgrounds, ICS logo, partner footer, responsive panels and interaction/reduced-motion-aware slides. Greek mock contexts and ICS text support local form review; native email styling remains pending.
+- Space labels above the white outer focus frames; password focus frames surround both the field and visibility button, with a distinct button background for keyboard focus.
+- Integrate the centered eye button into the shared password field surface using adjacent flex items, keeping it visible while typing and focused.
+- Reveal passwords only while the eye or Space/Enter is held; release, cancellation, focus loss and document visibility changes restore masking. Replace the upstream visibility hook through a narrow Vite alias and add a regression interaction story.
+- Place the centered, bold italic “Κεντρική είσοδος” heading immediately below the italic Greek tagline on every login-theme page, including pages where the upstream title block is conditional.
+- Verification: independent frozen-lockfile restore, TypeScript/Vite, static Storybook and login/email JAR packaging passed; archive contents inspected. Login, password-update, MFA and invalid-credential previews inspected in Chrome; a validation contrast issue was fixed. Node 22 live Storybook startup passed. Mobile and live Keycloak workflows remain unverified.
+- Image-task verification: 13 offline command tests pass; actual linux/amd64 r2 image built, embedded JAR/hash and Keycloak26.7.4 version inspected, archive exported/validated. Spec/Standards review findings resolved. Placeholder-only Compose validation passed; no remote rollout or workflow acceptance claimed.
+
+### Breaking changes
+
+None.
+
+### Deployment
+
+Propagate reviewed Containers changes to the release-server checkout before running the Keycloak deployment task; the task does not push or pull Git. Build/export locally, then copy/deploy with SSH authentication. The new selector is required and preserves protected `.env` settings. Keycloak restarts briefly; other services are not recreated. Login/email theme selection is a separate action limited to the agreed `ics-theme-test` realm. No remote rollout or realm setting change is recorded.
+
+### Compatibility
+
+User-authenticated inspection confirmed the server runs Keycloak 26.7.4/r1 on amd64. The local r2 image matches that target; workflow and email acceptance remain unverified. The default remains r1; explicit themed delivery selects r2. Operations and other component selectors are unchanged.
+
+---
+
 ## 26.10.7 — 2026-10-28
 
 Status: Draft
